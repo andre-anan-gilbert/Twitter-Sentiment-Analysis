@@ -9,6 +9,14 @@
 
 ## Prerequisites
 
+Open Docker Desktop
+
+Start minikube 
+
+```bash
+minikube start
+```
+
 A running Strimzi.io Kafka operator
 
 ```bash
@@ -27,3 +35,9 @@ helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=def
 ## Deploy
 
 To develop using [Skaffold](https://skaffold.dev/), use `skaffold dev`.
+
+## Access the APP
+
+```bash
+minikube service popular-slides-service --url
+```
