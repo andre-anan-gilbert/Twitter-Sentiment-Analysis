@@ -21,7 +21,7 @@ A running Strimzi.io Kafka operator
 
 ```bash
 helm repo add strimzi http://strimzi.io/charts/
-helm install my-kafka-operator strimzi/strimzi-kafka-operator
+helm upgrade --install my-kafka-operator strimzi/strimzi-kafka-operator
 kubectl apply -f https://farberg.de/talks/big-data/code/helm-kafka-operator/kafka-cluster-def.yaml
 ```
 

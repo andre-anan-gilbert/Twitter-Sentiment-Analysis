@@ -42,7 +42,7 @@ RUN useradd --uid 1001 --gid spark --shell /bin/bash spark
 RUN apt-get update && apt-get install -y zip
 
 # Workaround for "No module named numpy"
-RUN python3.9 -m pip install numpy
+RUN python3 -m pip install numpy
 
 RUN chown spark:spark /app/
 
