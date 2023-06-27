@@ -1,0 +1,107 @@
+#Begin: Configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-deployment-init-configmap
+data:
+  mariadb-init.sql: |
+    SET GLOBAL sql_mode = 'ANSI_QUOTES';
+
+    CREATE TABLE `tweets` (
+      `tweet_id` INT NOT NULL,
+      `tweet` VARCHAR(280),
+      `author` VARCHAR(30),
+      PRIMARY KEY (`tweet_id`)
+    );
+
+    CREATE TABLE `popular` (
+      `tweet_id` INT NOT NULL,
+      `sentiment` BOOLEAN,
+      `count` BIGINT,
+      PRIMARY KEY (`tweet_id`)
+    );
+
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (0, "@sketchbug Lebron is a hometown hero to me, lol I love the Lakers but let's go Cavs, lol", "princezzcutz");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (1, "glad i didnt do Bay to Breakers today, it's 1000 freaking degrees in San Francisco wtf", "Adrigonzo");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (2, "@YarnThing you will not regret going to see Star Trek. It was AWESOME!", "mimknits");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (3, "@morind45 Because the twitter api is slow and most client's aren't good.", "raykolbe");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (4, "RT @SmartChickPDX: Was just told that Nike layoffs started today :-(", "coreysmbpro");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (5, "Can we just go ahead and blow North Korea off the map already?", "utsagrad123");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (6, "I can't wait, going to see star trek tonight!!", "qrboy85");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (7, "Arg. Twitter API is making me crazy.", "rdoc420");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (8, "Only one exam left, and i am so happy for it :D", "laulaulauren");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (9, "argghhhh why won't  my jquery appear in safari bad safari !!!", "TobyJuanKenobi");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (10, "I love my Kindle2. No more stacks of books to trip over on the way to the loo.", "k8tb52");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (11, "dearest @google, you rich bastards! the VISA card you sent me doesn't work. why screw a little guy like me?", "_abi_");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (12, "using Linux and loving it - so much nicer than windows... Looking forward to using the wysiwyg latex editor!", "roguemovement");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (13, "I just created my first LaTeX file from scratch. That didn't work out very well. (See @amandabittner , it's a great time waster)", "rooney_tunes");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (14, "The #Kindle2 seems the best eReader, but will it work in the UK and where can I get one?", "Ant_Ward");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (15, "HATE safeway select green tea icecream! bought two cartons, what a waste of money.", "fugface85");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (16, "yankees won mets lost. its a good day.", "irishyanks");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (17, "Give a man a fish, u feed him for the day. Teach him to fish, u feed him for life. Buy him GM, and u F**K him over for good.", "BarackProblema");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (18, "Yay! Happy place! Place place!  I love Google!", "jackdaniels08");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (19, "Math review. Im going to fail the exam.", "elllllen");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (20, "The day I never have to deal with Comcast again will rank as one of the best days of my life.", "theZoctor");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (21, "Star Trek was as good as everyone said!!", "adamrisser");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (22, "Talk is Cheap: Bing that, I?ll stick with Google.", "StrategisAdv");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (23, "@MMBarnhill yay, glad you got the phone! Still, damn you, AT&amp;T.", "chelseabot");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (24, "@Mbjthegreat i really dont want AT&amp;T phone service..they suck when it comes to having a signal", "nakiasmile");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (25, "We went to Stanford University today. Got a tour. Made me want to go back to college. It's also decided all of our kids will go there.", "TammyT");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (26, "Recovering from surgery..wishing @julesrenner was here :(", "scoralli");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (27, "I am happy for Philip being at GoogleIO today", "maex242");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (28, "@phyreman9 Google is always a good place to look. Should've mentioned I worked on the Mustang w/ my Dad, @KimbleT.", "J_Holl");
+    INSERT INTO tweets (tweet_id, tweet, author) VALUES (29, "good news, just had a call from the Visa office, saying everything is fine.....what a relief! I am sick of scams out there! Stealing!", "DreambigRadio");
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb-deployment
+  labels:
+    app: my-mariadb-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-mariadb
+  template:
+    metadata:
+      labels:
+        app: my-mariadb
+    spec:
+      # Mount the configmap volume
+      # This is an excerpt of deployment.spec.template.spec
+      volumes:
+        - name: init-volume
+          configMap:
+            name: mariadb-deployment-init-configmap
+      containers:
+        - name: my-mariadb
+          image: mariadb
+          volumeMounts:
+            - name: init-volume
+              mountPath: /docker-entrypoint-initdb.d/
+          # Set required environment variables to initialize the container
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              value: "mysecretpw"
+            - name: MARIADB_DATABASE
+              value: "popular"
+          ports:
+            - containerPort: 3306
+
+---
+#Begin: Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-app-mariadb-service
+spec:
+  selector:
+    app: my-mariadb
+  ports:
+    - name: mariadb-proto
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+#End: Service
