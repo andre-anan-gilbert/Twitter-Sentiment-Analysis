@@ -19,7 +19,7 @@ def _read_data():
         StructField("tweet", StringType(), True),
     ])
     df = spark.read.csv(
-        'file:///app/tweets.1600000.processed.noemoticon.csv',
+        'file:///app/tweets.1600000.processed.noemoticon.csv.gz',
         inferSchema=True,
         header=False,
         schema=schema,
