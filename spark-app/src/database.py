@@ -1,4 +1,5 @@
 import mysql.connector
+import logging
 
 _DB_OPTIONS = {
     "host": "my-app-mariadb-service",
@@ -27,9 +28,7 @@ def saveToDatabase(batchDataframe, batchId):
             connection.commit()
 
         connection.close()
-
-    print(
-        f"Writing batchID {batchId} to database @ {_DB_OPTIONS['host']}:{_DB_OPTIONS['port']}/{_DB_OPTIONS['database']}"
-    )
+    logging.info(f"Writing batchID {batchId} to database @ {_DB_OPTIONS['host']}:{_DB_OPTIONS['port']}/{_DB_OPTIONS['database']}")
+    
     # Perform batch UPSERTS per data partition
     batchDataframe.foreachPartition(save_to_db)
