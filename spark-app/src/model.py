@@ -24,7 +24,7 @@ def _read_data():
         header=False,
         schema=schema,
     )
-    df.dropna()
+    df = df.dropna()
 
     # Remove neutral tweets
     df = df.where(df.polarity != 2)
