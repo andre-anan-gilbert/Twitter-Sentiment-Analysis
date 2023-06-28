@@ -1,8 +1,9 @@
-# Use Case: Popular NASA Shuttle Missions
+# Twitter Sentiment Analysis
 
 ```json
 {
-  "mission": "sts-10",
+  "tweet_id": 0,
+  "tweet": "content",
   "timestamp": 1604325221
 }
 ```
