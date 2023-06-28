@@ -48,25 +48,25 @@ If issues arise, try to redeploy k8s resources.
 
 After initial startup it might fail if executed to quickly after starting kafka. Just re-run **skaffold dev** a little bit later.
 
-Here are some commands to completely redeploy Hadoop and Kafka
+Here are some commands to completely redeploy Hadoop and Kafka <br />
 To delete strimzi resources
 
 ```bash
-// get resources managed by strimzi
+// Get resources managed by strimzi
 kubectl get strimzi -o name
-# pass those resources to delete
+// Pass those resources to delete
 kubectl delete <name>
-To delete helm chart and helm repo
+// To delete helm chart and helm repo
 ```
 
 ```bash
-// delete helm chart
+// Delete helm chart
 helm list
 helm delete <chartname>
-// delete helm repo
+// Delete helm repo
 helm repo list
 helm repo remove
-Now you can execute the commands from prequisites again.
+// Now you can execute the commands from prequisites again.
 ```
 
 Ingress
