@@ -65,7 +65,7 @@ helm list
 helm delete <chartname>
 // Delete helm repo
 helm repo list
-helm repo remove
+helm repo remove <repo_name>
 // Now you can execute the commands from prequisites again.
 ```
 
