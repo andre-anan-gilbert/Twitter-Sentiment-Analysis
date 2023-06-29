@@ -37,10 +37,17 @@ helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=def
 
 To develop using [Skaffold](https://skaffold.dev/), use `skaffold dev`.
 
-## Access the APP
+## Access the Application
 
 ```bash
 minikube service popular-slides-service --url
+```
+
+In case an installation command fails, try to update the respective repo using one of the commands below or use the --debug flag with the installation command for further information.
+
+```bash
+helm repo update strimzi
+helm repo update stable
 ```
 
 ## Troubleshooting
@@ -57,8 +64,9 @@ To delete strimzi resources
 kubectl get strimzi -o name
 // Pass those resources to delete
 kubectl delete <name>
-// To delete helm chart and helm repo
 ```
+
+To delete helm chart and helm repo
 
 ```bash
 // Delete helm chart
