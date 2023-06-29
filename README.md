@@ -46,6 +46,12 @@ minikube tunnel
 
 Access the application at: http://localhost.
 
+Generate an URL alternatively
+
+```bash
+minikube service popular-slides-service --url
+```
+
 In case an installation command fails, try to update the respective repo using one of the commands below or use the --debug flag with the installation command for further information.
 
 ```bash
