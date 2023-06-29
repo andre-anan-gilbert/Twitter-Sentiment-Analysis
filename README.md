@@ -80,11 +80,3 @@ helm repo list
 helm repo remove <repo_name>
 // Now you can execute the commands from prequisites again.
 ```
-
-Ingress
-To utilize Ingress, you need an Ingress controller.
-With Minikube
-
-```bash
-minikube addons enable ingress
-```
