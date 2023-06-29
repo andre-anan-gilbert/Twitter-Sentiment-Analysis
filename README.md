@@ -12,7 +12,7 @@
 
 Open Docker Desktop
 
-Start minikube 
+Start minikube
 
 ```bash
 minikube start
@@ -40,8 +40,11 @@ To develop using [Skaffold](https://skaffold.dev/), use `skaffold dev`.
 ## Access the Application
 
 ```bash
-minikube service popular-slides-service --url
+minikube addons enable ingress
+minikube tunnel
 ```
+
+Access the application at: http://localhost.
 
 In case an installation command fails, try to update the respective repo using one of the commands below or use the --debug flag with the installation command for further information.
 
