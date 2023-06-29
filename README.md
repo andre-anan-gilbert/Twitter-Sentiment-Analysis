@@ -47,7 +47,7 @@ In case an installation command fails, try to update the respective repo using o
 
 ```bash
 helm repo update strimzi
-helm repo update stable
+helm repo update pfisterer-hadoop
 ```
 
 ## Troubleshooting
