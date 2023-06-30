@@ -19,6 +19,7 @@
 
 ## Application Architecture
 
+Example Kafka message:
 ```json
 {
   "tweet_id": 0,
@@ -27,7 +28,7 @@
 }
 ```
 
-## Dataset used for PySpark ML
+### Dataset used for PySpark ML
 
 Sentiment140: http://help.sentiment140.com/for-students
 
