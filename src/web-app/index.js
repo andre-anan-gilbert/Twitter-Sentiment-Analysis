@@ -1,4 +1,4 @@
-const moment = require('moment')
+const moment = require("moment");
 const os = require("os");
 const dns = require("dns").promises;
 const { program: optionparser } = require("commander");
@@ -12,19 +12,10 @@ const cacheTimeSecs = 15;
 const numberOfTweets = 30;
 
 function logging(message) {
-  // let options = { 
-  //   day: '2-digit', 
-  //   month: '2-digit', 
-  //   year: '2-digit',
-  //   hour: '2-digit',
-  //   minute: '2-digit',
-  //   second: '2-digit'
-  // };
-  // let date = new Date().toLocaleDateString('en', options)
-  // let time = new Date().toLocaleTimeString('en', options)
-  // console.log(date.slice(-2) + "/" + date.slice(4) + " " + time + " INFO " + message);
-  let dateTime = new Date()
-  console.log(moment(dateTime).format('YY/MM/DD HH:MM:SS') + " INFO " + message);
+  const dateTime = new Date();
+  console.log(
+    moment(dateTime).format("YY/MM/DD HH:MM:SS") + " INFO " + message
+  );
 }
 
 // -------------------------------------------------------
@@ -204,7 +195,6 @@ function sendResponse(res, html, cachedResult) {
           document.getElementById("out").innerText = "Fetching " + maxRepetitions + " random tweets, see console output"
             for(var i = 0; i < maxRepetitions; ++i) {
               const tweetId = Math.floor(Math.random() * ${numberOfTweets})
-              ${logging("Fetching tweet id " + tweetId)}
               fetch("/tweets/" + tweetId, {cache: 'no-cache'})
           }
         }
@@ -279,7 +269,7 @@ app.get("/", (req, res) => {
     const popular = values[1];
 
     const tweetsHtml = tweets.result
-      .map((tweet_id) => `<a href='tweets/${tweet_id}'>${tweet_id}</a>`)
+      .map((tweetId) => `<a href='tweets/${tweetId}'>${tweetId}</a>`)
       .join(", ");
 
     const popularHtml = popular
@@ -339,6 +329,7 @@ async function getTweet(tweetId) {
 
 app.get("/tweets/:id", async (req, res) => {
   let tweetId = req.params["id"];
+  logging("Fetching tweet id " + tweetId);
   const tweet = await getTweet(tweetId);
 
   // Send the tracking message to Kafka
@@ -377,5 +368,9 @@ app.get("/tweets/:id", async (req, res) => {
 // -------------------------------------------------------
 
 app.listen(options.port, function () {
-  logging("Node app is running at http://localhost:" + options.port + "in popular-slides-web");
+  logging(
+    "Node app is running at http://localhost:" +
+      options.port +
+      "in popular-slides-web"
+  );
 });
