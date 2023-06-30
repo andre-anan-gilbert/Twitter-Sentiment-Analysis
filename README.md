@@ -19,8 +19,6 @@
 
 ## Application Architecture
 
-## Get Started
-
 ```json
 {
   "tweet_id": 0,
@@ -41,7 +39,7 @@ The data is a CSV with emoticons removed. Data file format has 6 fields:
 5. The user that tweeted (robotickilldozr)
 6. The text of the tweet (Lyx is cool)
 
-## Prerequisites
+## Get Started
 
 Open Docker Desktop
 
