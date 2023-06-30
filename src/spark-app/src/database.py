@@ -10,7 +10,7 @@ _DB_OPTIONS = {
 }
 
 
-def saveToDatabase(batchDataframe, batchId):
+def save_to_database(batch_dataframe, batch_id):
     # Define function to save a dataframe to mariadb
     def save_to_db(iterator):
 
@@ -28,7 +28,7 @@ def saveToDatabase(batchDataframe, batchId):
             connection.commit()
 
         connection.close()
-    logging.info(f"Writing batchID {batchId} to database @ {_DB_OPTIONS['host']}:{_DB_OPTIONS['port']}/{_DB_OPTIONS['database']}")
+    logging.info(f"Writing batchID {batch_id} to database @ {_DB_OPTIONS['host']}:{_DB_OPTIONS['port']}/{_DB_OPTIONS['database']}")
     
     # Perform batch UPSERTS per data partition
-    batchDataframe.foreachPartition(save_to_db)
+    batch_dataframe.foreachPartition(save_to_db)
