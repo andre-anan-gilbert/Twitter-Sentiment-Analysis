@@ -1,5 +1,12 @@
 # Twitter Sentiment Analysis
 
+## Contributors
+- Andre-Anan Gilbert (3465546)
+- David Hoffmann (2571020)
+- Jan Henrik Bertrand (8556462)
+- Marc Grün (9603221)
+- Felix Noll (9467152)
+
 ```json
 {
   "tweet_id": 0,
