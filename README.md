@@ -1,5 +1,7 @@
 # Twitter Sentiment Analysis
 
+This repository's goal is to showcase how to use Kubernetes, Docker, Kafka and PySpark to analyse the sentiment of tweets in real-time using machine learning. The Spark app uses a logistic regression model to predict the polarity of tweets that are streamed via Kafka. 
+
 ## Contributors
 - Andre-Anan Gilbert (3465546)
 - David Hoffmann (2571020)
@@ -8,14 +10,9 @@
 - Felix Noll (9467152)
 
 ## Table of Contents
-1. [Introduction](#introduction)
-2. [Business Use Case](#business-use-case)
-3. [Application Architecture](#application-architecture)
-4. [Get Started](#get-started)
-
-## Introduction
-
-This repository's goal is to showcase how to use Kubernetes, Docker, Kafka and PySpark to analyse the sentiment of tweets in real-time using machine learning. The Spark app uses a logistic regression model to predict the polarity of tweets that are streamed via Kafka. 
+1. [Business Use Case](#business-use-case)
+2. [Application Architecture](#application-architecture)
+3. [Get Started](#get-started)
 
 ## Business Use Case
 
