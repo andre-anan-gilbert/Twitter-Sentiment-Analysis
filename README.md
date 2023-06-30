@@ -1,6 +1,6 @@
 # Twitter Sentiment Analysis
 
-## Contributers
+## Contributors
 - Andre-Anan Gilbert (3465546)
 - David Hoffmann (2571020)
 - Jan Henrik Bertrand (8556462)
