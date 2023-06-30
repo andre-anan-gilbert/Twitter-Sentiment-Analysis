@@ -65,11 +65,11 @@ helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
 helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=default --set hdfs.dataNode.replicas=1 --set yarn.nodeManager.replicas=1 --set hdfs.webhdfs.enabled=true
 ```
 
-## Deploy
+### Deploy
 
 To develop using [Skaffold](https://skaffold.dev/), use `skaffold dev`.
 
-## Access the Application
+### Access the Application
 
 ```bash
 minikube addons enable ingress
