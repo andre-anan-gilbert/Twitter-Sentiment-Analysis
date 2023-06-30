@@ -2,7 +2,7 @@ import mysql.connector
 import logging
 
 # Set logging format
-logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', datefmt='%d/%m/%y %H:%M:%S')
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', datefmt='%y/%m/%d %H:%M:%S')
 
 _DB_OPTIONS = {
     "host": "my-app-mariadb-service",

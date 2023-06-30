@@ -16,6 +16,7 @@
     "kafkajs": "^1.16.0",
     "lorem-ipsum": "^2.0.4",
     "mariadb": "^3.0.0",
-    "memcache-plus": "^0.2.22"
+    "memcache-plus": "^0.2.22",
+    "moment": "2.29.4"
   }
 }

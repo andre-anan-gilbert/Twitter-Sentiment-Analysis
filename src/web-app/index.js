@@ -1,3 +1,4 @@
+const moment = require('moment')
 const os = require("os");
 const dns = require("dns").promises;
 const { program: optionparser } = require("commander");
@@ -11,15 +12,19 @@ const cacheTimeSecs = 15;
 const numberOfTweets = 30;
 
 function logging(message) {
-  var options = { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  };
-  console.log(new Date().toLocaleString('en-GB', options) + " [INFO] " + message);
+  // let options = { 
+  //   day: '2-digit', 
+  //   month: '2-digit', 
+  //   year: '2-digit',
+  //   hour: '2-digit',
+  //   minute: '2-digit',
+  //   second: '2-digit'
+  // };
+  // let date = new Date().toLocaleDateString('en', options)
+  // let time = new Date().toLocaleTimeString('en', options)
+  // console.log(date.slice(-2) + "/" + date.slice(4) + " " + time + " INFO " + message);
+  let dateTime = new Date()
+  console.log(moment(dateTime).format('YY/MM/DD HH:MM:SS') + " INFO " + message);
 }
 
 // -------------------------------------------------------
@@ -372,5 +377,5 @@ app.get("/tweets/:id", async (req, res) => {
 // -------------------------------------------------------
 
 app.listen(options.port, function () {
-  logging("Node app is running at http://localhost:" + options.port);
+  logging("Node app is running at http://localhost:" + options.port + "in popular-slides-web");
 });
