@@ -7,6 +7,20 @@
 - Marc Grün (9603221)
 - Felix Noll (9467152)
 
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Business Use Case](#business-use-case)
+3. [Application Architecture](#application-architecture)
+4. [Get Started](#get-started)
+
+## 1. Introduction
+
+## 2. Business Use Case
+
+## 3. Application Architecture
+
+## 4. Get Started
+
 ```json
 {
   "tweet_id": 0,
