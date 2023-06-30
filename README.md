@@ -1,17 +1,21 @@
-# Use Case: Popular NASA Shuttle Missions
+# Twitter Sentiment Analysis
 
 ```json
 {
-  "mission": "sts-10",
+  "tweet_id": 0,
+  "tweet": "content",
   "timestamp": 1604325221
 }
 ```
+
+## Dataset
+http://help.sentiment140.com/for-students
 
 ## Prerequisites
 
 Open Docker Desktop
 
-Start minikube 
+Start minikube
 
 ```bash
 minikube start
@@ -36,10 +40,26 @@ helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=def
 
 To develop using [Skaffold](https://skaffold.dev/), use `skaffold dev`.
 
-## Access the APP
+## Access the Application
+
+```bash
+minikube addons enable ingress
+minikube tunnel
+```
+
+Access the application at: http://localhost.
+
+Generate an URL alternatively
 
 ```bash
 minikube service popular-slides-service --url
+```
+
+In case an installation command fails, try to update the respective repo using one of the commands below or use the --debug flag with the installation command for further information.
+
+```bash
+helm repo update strimzi
+helm repo update pfisterer-hadoop
 ```
 
 ## Troubleshooting
@@ -56,8 +76,9 @@ To delete strimzi resources
 kubectl get strimzi -o name
 // Pass those resources to delete
 kubectl delete <name>
-// To delete helm chart and helm repo
 ```
+
+To delete helm chart and helm repo
 
 ```bash
 // Delete helm chart
@@ -67,12 +88,4 @@ helm delete <chartname>
 helm repo list
 helm repo remove <repo_name>
 // Now you can execute the commands from prequisites again.
-```
-
-Ingress
-To utilize Ingress, you need an Ingress controller.
-With Minikube
-
-```bash
-minikube addons enable ingress
 ```
