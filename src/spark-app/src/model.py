@@ -1,3 +1,5 @@
+"""Logistic regression model for tweet sentiment prediction."""
+import logging
 from pyspark.sql.types import IntegerType, StringType, StructType, StructField
 from pyspark.ml.classification import LogisticRegression
 from pyspark.ml.feature import IDF, Tokenizer, StringIndexer, CountVectorizer
@@ -5,12 +7,12 @@ from pyspark.ml import PipelineModel
 from pyspark.ml.classification import LogisticRegression
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
 from session import spark
-import logging
 
 _MODEL_PATH = '/app/model/'
 
 
 def _read_data():
+    """Read tweets data from HTTP file server."""
     schema = StructType([
         StructField("polarity", IntegerType(), True),
         StructField("id", StringType(), True),
@@ -25,6 +27,8 @@ def _read_data():
         header=False,
         schema=schema,
     )
+
+    # Remove rows with null values
     df = df.dropna()
 
     # Remove neutral tweets
@@ -36,6 +40,7 @@ def _read_data():
 
 
 def _split_data(df):
+    """Splits data into train and test sets."""
     logging.info('Splitting data into train/test')
     df_train, df_test = df.randomSplit([0.90, 0.10], seed=42)
     logging.info('Data distribution')
@@ -49,16 +54,17 @@ def _split_data(df):
 
 
 def _preprocess_data(df_train, df_test):
+    """Transforms data into the expected format of the ML model."""
     logging.info('Tokenizing words')
-    tokenizer = Tokenizer(inputCol="tweet", outputCol="words")
+    tokenizer = Tokenizer(inputCol='tweet', outputCol='words')
 
     logging.info('Applying count vectorizer')
-    count_vectorizer = CountVectorizer(inputCol="words", outputCol='count_vector')
+    count_vectorizer = CountVectorizer(inputCol='words', outputCol='count_vector')
 
     logging.info('Applying inverse document frequency')
-    inverse_document_frequency = IDF(inputCol='count_vector', outputCol="features")
+    inverse_document_frequency = IDF(inputCol='count_vector', outputCol='features')
 
-    string_indexer = StringIndexer(inputCol="polarity", outputCol="label")
+    string_indexer = StringIndexer(inputCol='polarity', outputCol='label')
 
     logging.info('Preprocessing train data')
     df_train = tokenizer.transform(df_train)
@@ -79,11 +85,10 @@ def _preprocess_data(df_train, df_test):
 
 
 def _get_metrics(predictions):
-    # AUC-ROC
+    """Logs the metrics of the trained model."""
     evaluator = BinaryClassificationEvaluator(rawPredictionCol='rawPrediction', labelCol='label')
     auc = evaluator.evaluate(predictions)
 
-    # Accuracy, Precision, and Recall
     multi_evaluator = MulticlassClassificationEvaluator(labelCol='label', predictionCol='prediction')
     accuracy = multi_evaluator.evaluate(predictions, {multi_evaluator.metricName: 'accuracy'})
     precision = multi_evaluator.evaluate(predictions, {multi_evaluator.metricName: 'weightedPrecision'})
@@ -96,6 +101,7 @@ def _get_metrics(predictions):
 
 
 def _save_model(*stages):
+    """Saves a pipeline model to hdfs."""
     logging.info('Saving model')
     model_pipeline = PipelineModel(stages=[*stages])
     model_pipeline.write().overwrite().save(_MODEL_PATH)
@@ -103,6 +109,7 @@ def _save_model(*stages):
 
 
 def train_model():
+    """Trains a logistic regression model for tweet sentiment prediction."""
     df = _read_data()
 
     df_train, df_test = _split_data(df)
@@ -129,4 +136,5 @@ def train_model():
 
 
 def load_model():
+    """Loads a pipeline model from hdfs."""
     return PipelineModel.load(_MODEL_PATH)

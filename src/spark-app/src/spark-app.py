@@ -1,67 +1,70 @@
-from pyspark.sql.functions import *
+"""PySpark entrypoint."""
+import logging
+import pyspark.sql.functions as F
 from pyspark.sql.types import IntegerType, StringType, StructType, TimestampType
 from model import load_model, train_model
 from database import save_to_database
 from session import spark
+from utils import NoPipelineModelFoundError
+
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', datefmt='%y/%m/%d %H:%M:%S')
+logging.getLogger().setLevel(logging.INFO)
 
 _WINDOW_DURATION = '1 minute'
 _SLIDING_DURATION = '1 minute'
 
-# Example Part 2
+# Load or train tweet sentiment prediction model
+try:
+    model_pipeline = load_model()
+except NoPipelineModelFoundError:
+    logging.error('No PySpark PipelineModel found. Training model instead.')
+    model_pipeline = train_model()
+
 # Read messages from Kafka
-kafka_messages = spark.readStream.format("kafka").option(
-    "kafka.bootstrap.servers",
-    "my-cluster-kafka-bootstrap:9092",
+kafka_messages = spark.readStream.format('kafka').option(
+    'kafka.bootstrap.servers',
+    'my-cluster-kafka-bootstrap:9092',
 ).option(
-    "subscribe",
-    "tracking-data",
+    'subscribe',
+    'tracking-data',
 ).option(
-    "startingOffsets",
-    "earliest",
+    'startingOffsets',
+    'earliest',
 ).load()
 
 # Define schema of tracking data
 tracking_message_schema = StructType().add(
-    "tweet_id",
+    'tweet_id',
     IntegerType(),
 ).add(
-    "tweet",
+    'tweet',
     StringType(),
 ).add(
-    "timestamp",
+    'timestamp',
     IntegerType(),
 )
 
-# Example Part 3
 # Convert value: binary -> JSON -> fields + parsed timestamp
 tracking_messages = kafka_messages.select(
     # Extract 'value' from Kafka message (i.e., the tracking data)
-    from_json(
-        column("value").cast("string"),
+    F.from_json(
+        F.column('value').cast('string'),
         tracking_message_schema,
-    ).alias("json")).select(
+    ).alias('json')).select(
         # Convert Unix timestamp to TimestampType
-        from_unixtime(column('json.timestamp')).cast(TimestampType()).alias("parsed_timestamp"),
-
-        # Select all JSON fields
-        column("json.*"),
-    ).withColumnRenamed(
-        'json.tweet_id',
-        'tweet_id',
-    ).withColumnRenamed(
-        'json.tweet',
-        'tweet',
+        F.from_unixtime(F.column('json.timestamp')).cast(TimestampType()).alias('parsed_timestamp'),
+        F.column('json.tweet_id').alias('tweet_id'),
+        F.column('json.tweet').alias('tweet'),
     ).withWatermark(
-        "parsed_timestamp",
+        'parsed_timestamp',
         _WINDOW_DURATION,
     )
 
-# Example Part 4
-# Compute most popular slides
+# Compute most popular tweets
 popular = tracking_messages.groupBy(
-    window(column("parsed_timestamp"), _WINDOW_DURATION, _SLIDING_DURATION),
-    column("tweet"),
-    column("tweet_id"),
+    F.window(F.column('parsed_timestamp'), _WINDOW_DURATION, _SLIDING_DURATION),
+    F.column('tweet'),
+    F.column('tweet_id'),
 ).count().withColumnRenamed(
     'window.start',
     'window_end',
@@ -70,27 +73,22 @@ popular = tracking_messages.groupBy(
     'window_start',
 )
 
-# Tweet sentiment prediction
-try:
-    model_pipeline = load_model()
-except:
-    model_pipeline = train_model()
-
+# Predict sentiment of tweets
 popular = model_pipeline.transform(popular)
 
-# Example Part 5
-# Start running the query; print running counts to the console
-console_dump = popular.writeStream.trigger(processingTime=_SLIDING_DURATION).outputMode("update").format("console").option(
-    "truncate",
-    "false",
-).start()
+# Print running counts to the console
+console_dump = popular.writeStream.trigger(
+    processingTime=_SLIDING_DURATION).outputMode('update').format('console').option(
+        'truncate',
+        'false',
+    ).start()
 
-# Example Part 7
+# Save each batch to MariaDB
 db_insert_stream = popular.select(
-    column('tweet_id'),
-    column('count'),
-    column('prediction'),
-).writeStream.trigger(processingTime=_SLIDING_DURATION).outputMode("update").foreachBatch(save_to_database).start()
+    F.column('tweet_id'),
+    F.column('count'),
+    F.column('prediction'),
+).writeStream.trigger(processingTime=_SLIDING_DURATION).outputMode('complete').foreachBatch(save_to_database).start()
 
 # Wait for termination
 spark.streams.awaitAnyTermination()

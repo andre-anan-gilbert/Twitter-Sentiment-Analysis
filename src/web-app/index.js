@@ -8,8 +8,9 @@ const MemcachePlus = require("memcache-plus");
 const express = require("express");
 
 const app = express();
-const cacheTimeSecs = 15;
-const numberOfTweets = 30;
+
+const CACHE_TIME_SECONDS = 15;
+const NUMBER_OF_TWEETS = 30;
 
 function logging(message) {
   const dateTime = new Date();
@@ -171,7 +172,7 @@ async function sendTrackingMessage(data) {
     messages: [{ value: JSON.stringify(data) }],
   });
 
-  logging("Send result:" + result);
+  logging("Send result = " + JSON.stringify(result));
   return result;
 }
 // End
@@ -191,10 +192,10 @@ function sendResponse(res, html, cachedResult) {
       <link type="text/css" rel="stylesheet" href="style.css">
 			<script>
         function fetchRandomTweets() {
-          const maxRepetitions = Math.floor(Math.random() * 100)
+          const maxRepetitions = Math.floor(Math.random() * 200)
           document.getElementById("out").innerText = "Fetching " + maxRepetitions + " random tweets, see console output"
             for(var i = 0; i < maxRepetitions; ++i) {
-              const tweetId = Math.floor(Math.random() * ${numberOfTweets})
+              const tweetId = Math.floor(Math.random() * ${NUMBER_OF_TWEETS})
               fetch("/tweets/" + tweetId, {cache: 'no-cache'})
           }
         }
@@ -230,18 +231,22 @@ async function getTweets() {
   let cacheData = await getFromCache(key);
 
   if (cacheData) {
-    logging(`Cache hit for key=${key}, cacheData = ` + cacheData);
+    logging(
+      `Cache hit for key = ${key}, cacheData = ${JSON.stringify(cacheData)}`
+    );
     return { result: cacheData, cached: true };
   } else {
-    logging(`Cache miss for key=${key}, querying database`);
+    logging(`Cache miss for key = ${key}, querying database`);
     const data = await executeQuery(
       "SELECT tweet_id FROM tweets ORDER BY tweet_id",
       []
     );
     if (data) {
       let result = data.map((row) => row?.[0]);
-      logging("Got result=" + result + " storing in cache");
-      if (memcached) await memcached.set(key, result, cacheTimeSecs);
+      logging(
+        "Got result = " + JSON.stringify.apply(result) + " storing in cache"
+      );
+      if (memcached) await memcached.set(key, result, CACHE_TIME_SECONDS);
       return { result, cached: false };
     } else {
       throw "No tweets data found";
@@ -306,10 +311,12 @@ async function getTweet(tweetId) {
   let cacheData = await getFromCache(key);
 
   if (cacheData) {
-    logging(`Cache hit for key=${key}, cacheData = ${cacheData}`);
+    logging(
+      `Cache hit for key = ${key}, cacheData = ${JSON.stringify(cacheData)}`
+    );
     return { ...cacheData, cached: true };
   } else {
-    logging(`Cache miss for key=${key}, querying database`);
+    logging(`Cache miss for key = ${key}, querying database`);
 
     let data = (await executeQuery(query, [tweetId]))?.[0]; // first entry
     if (data) {
@@ -318,8 +325,8 @@ async function getTweet(tweetId) {
         tweet: data?.[1],
         author: data?.[2],
       };
-      logging(`Got result=${result}, storing in cache`);
-      if (memcached) await memcached.set(key, result, cacheTimeSecs);
+      logging(`Got result = ${result}, storing in cache`);
+      if (memcached) await memcached.set(key, result, CACHE_TIME_SECONDS);
       return { ...result, cached: false };
     } else {
       throw "No data found for this tweet";
@@ -340,10 +347,10 @@ app.get("/tweets/:id", async (req, res) => {
   })
     .then(() =>
       logging(
-        `Sent mission=${tweetId} to kafka topic=${options.kafkaTopicTracking}`
+        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTracking}`
       )
     )
-    .catch((e) => logging("Error sending to kafka" + e));
+    .catch((e) => logging("Error sending to kafka " + e));
 
   // Send reply to browser
   getTweet(tweetId)
@@ -371,6 +378,6 @@ app.listen(options.port, function () {
   logging(
     "Node app is running at http://localhost:" +
       options.port +
-      "in popular-slides-web"
+      " in popular-slides-web"
   );
 });
