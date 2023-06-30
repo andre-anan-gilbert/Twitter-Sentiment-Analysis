@@ -1,11 +1,11 @@
 from pyspark.sql.functions import *
 from pyspark.sql.types import IntegerType, StringType, StructType, TimestampType
 from model import load_model, train_model
-from database import saveToDatabase
+from database import save_to_database
 from session import spark
 
-window_duration = '1 minute'
-sliding_duration = '1 minute'
+_WINDOW_DURATION = '1 minute'
+_SLIDING_DURATION = '1 minute'
 
 # Example Part 2
 # Read messages from Kafka
@@ -53,13 +53,13 @@ tracking_messages = kafka_messages.select(
         'tweet',
     ).withWatermark(
         "parsed_timestamp",
-        window_duration,
+        _WINDOW_DURATION,
     )
 
 # Example Part 4
 # Compute most popular slides
 popular = tracking_messages.groupBy(
-    window(column("parsed_timestamp"), window_duration, sliding_duration),
+    window(column("parsed_timestamp"), _WINDOW_DURATION, _SLIDING_DURATION),
     column("tweet"),
     column("tweet_id"),
 ).count().withColumnRenamed(
@@ -80,7 +80,7 @@ popular = model_pipeline.transform(popular)
 
 # Example Part 5
 # Start running the query; print running counts to the console
-console_dump = popular.writeStream.trigger(processingTime=sliding_duration).outputMode("update").format("console").option(
+console_dump = popular.writeStream.trigger(processingTime=_SLIDING_DURATION).outputMode("update").format("console").option(
     "truncate",
     "false",
 ).start()
@@ -90,7 +90,7 @@ db_insert_stream = popular.select(
     column('tweet_id'),
     column('count'),
     column('prediction'),
-).writeStream.trigger(processingTime=sliding_duration).outputMode("update").foreachBatch(saveToDatabase).start()
+).writeStream.trigger(processingTime=_SLIDING_DURATION).outputMode("update").foreachBatch(save_to_database).start()
 
 # Wait for termination
 spark.streams.awaitAnyTermination()
