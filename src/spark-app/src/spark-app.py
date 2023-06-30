@@ -65,13 +65,10 @@ popular = tracking_messages.groupBy(
     F.window(F.column('parsed_timestamp'), _WINDOW_DURATION, _SLIDING_DURATION),
     F.column('tweet'),
     F.column('tweet_id'),
-).count().withColumnRenamed(
-    'window.start',
-    'window_end',
-).withColumnRenamed(
-    'window.end',
-    'window_start',
-)
+).count()
+
+popular.window.start.alias('window_end')
+popular.window.end.alias('window_start')
 
 # Predict sentiment of tweets
 popular = model_pipeline.transform(popular)
