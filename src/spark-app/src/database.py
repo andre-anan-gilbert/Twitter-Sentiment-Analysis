@@ -28,7 +28,7 @@ def save_to_database(batch_dataframe, batch_id):
             connection.commit()
 
         connection.close()
-    logging.info(f"Writing batchID {batch_id} to database @ {_DB_OPTIONS['host']}:{_DB_OPTIONS['port']}/{_DB_OPTIONS['database']}")
+    logging.info(f"Writing batch_id {batch_id} to database @ {_DB_OPTIONS['host']}:{_DB_OPTIONS['port']}/{_DB_OPTIONS['database']}")
     
     # Perform batch UPSERTS per data partition
     batch_dataframe.foreachPartition(save_to_db)
