@@ -13,13 +13,13 @@
 3. [Application Architecture](#application-architecture)
 4. [Get Started](#get-started)
 
-## 1. Introduction
+## Introduction
 
-## 2. Business Use Case
+## Business Use Case
 
-## 3. Application Architecture
+## Application Architecture
 
-## 4. Get Started
+## Get Started
 
 ```json
 {
