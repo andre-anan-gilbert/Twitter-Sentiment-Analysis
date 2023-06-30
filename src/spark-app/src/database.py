@@ -1,8 +1,6 @@
 import mysql.connector
 import logging
 
-# Set logging format
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', datefmt='%y/%m/%d %H:%M:%S')
 
 _DB_OPTIONS = {
     "host": "my-app-mariadb-service",
@@ -13,7 +11,7 @@ _DB_OPTIONS = {
 }
 
 
-def save_to_database(batch_dataframe, batch_id):
+def save_to_database(batch_df, batch_id):
     # Define function to save a dataframe to mariadb
     def save_to_db(iterator):
 
@@ -31,7 +29,8 @@ def save_to_database(batch_dataframe, batch_id):
             connection.commit()
 
         connection.close()
+        
     logging.info(f"Writing batch_id {batch_id} to database @ {_DB_OPTIONS['host']}:{_DB_OPTIONS['port']}/{_DB_OPTIONS['database']}")
     
     # Perform batch UPSERTS per data partition
-    batch_dataframe.foreachPartition(save_to_db)
+    batch_df.foreachPartition(save_to_db)

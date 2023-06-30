@@ -7,9 +7,6 @@ from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClass
 from session import spark
 import logging
 
-# Set logging format
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', datefmt='%y/%m/%d %H:%M:%S')
-
 _MODEL_PATH = '/app/model/'
 
 
