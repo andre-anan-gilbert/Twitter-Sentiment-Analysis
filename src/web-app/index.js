@@ -10,6 +10,18 @@ const app = express();
 const cacheTimeSecs = 15;
 const numberOfTweets = 30;
 
+function logging(message) {
+  var options = { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  };
+  console.log(new Date().toLocaleString('en-GB', options) + " [INFO] " + message);
+}
+
 // -------------------------------------------------------
 // Command-line options (with sensible defaults)
 // -------------------------------------------------------
@@ -74,7 +86,7 @@ async function executeQuery(query, data) {
   let connection;
   try {
     connection = await pool.getConnection();
-    console.log("Executing query ", query);
+    logging("Executing query " + query);
     let res = await connection.query({ rowsAsArray: true, sql: query }, data);
     return res;
   } finally {
@@ -105,7 +117,7 @@ async function getMemcachedServersFromDns() {
     // Check if the list of servers has changed
     // and only create a new object if the server list has changed
     if (memcachedServers.sort().toString() !== servers.sort().toString()) {
-      console.log("Updated memcached server list to ", servers);
+      logging("Updated memcached server list to " + servers);
       memcachedServers = servers;
 
       //Disconnect an existing client
@@ -114,7 +126,7 @@ async function getMemcachedServersFromDns() {
       memcached = new MemcachePlus(memcachedServers);
     }
   } catch (e) {
-    console.log("Unable to get memcache servers (yet)");
+    logging("Unable to get memcache servers (yet)");
   }
 }
 
@@ -128,7 +140,7 @@ setInterval(
 //Get data from cache if a cache exists yet
 async function getFromCache(key) {
   if (!memcached) {
-    console.log(
+    logging(
       `No memcached instance available, memcachedServers = ${memcachedServers}`
     );
     return null;
@@ -163,7 +175,7 @@ async function sendTrackingMessage(data) {
     messages: [{ value: JSON.stringify(data) }],
   });
 
-  console.log("Send result:", result);
+  logging("Send result:" + result);
   return result;
 }
 // End
@@ -187,7 +199,7 @@ function sendResponse(res, html, cachedResult) {
           document.getElementById("out").innerText = "Fetching " + maxRepetitions + " random tweets, see console output"
             for(var i = 0; i < maxRepetitions; ++i) {
               const tweetId = Math.floor(Math.random() * ${numberOfTweets})
-              console.log("Fetching tweet id " + tweetId)
+              ${logging("Fetching tweet id " + tweetId)}
               fetch("/tweets/" + tweetId, {cache: 'no-cache'})
           }
         }
@@ -223,17 +235,17 @@ async function getTweets() {
   let cacheData = await getFromCache(key);
 
   if (cacheData) {
-    console.log(`Cache hit for key=${key}, cacheData = `, cacheData);
+    logging(`Cache hit for key=${key}, cacheData = ` + cacheData);
     return { result: cacheData, cached: true };
   } else {
-    console.log(`Cache miss for key=${key}, querying database`);
+    logging(`Cache miss for key=${key}, querying database`);
     const data = await executeQuery(
       "SELECT tweet_id FROM tweets ORDER BY tweet_id",
       []
     );
     if (data) {
       let result = data.map((row) => row?.[0]);
-      console.log("Got result=", result, "storing in cache");
+      logging("Got result=" + result + " storing in cache");
       if (memcached) await memcached.set(key, result, cacheTimeSecs);
       return { result, cached: false };
     } else {
@@ -299,10 +311,10 @@ async function getTweet(tweetId) {
   let cacheData = await getFromCache(key);
 
   if (cacheData) {
-    console.log(`Cache hit for key=${key}, cacheData = ${cacheData}`);
+    logging(`Cache hit for key=${key}, cacheData = ${cacheData}`);
     return { ...cacheData, cached: true };
   } else {
-    console.log(`Cache miss for key=${key}, querying database`);
+    logging(`Cache miss for key=${key}, querying database`);
 
     let data = (await executeQuery(query, [tweetId]))?.[0]; // first entry
     if (data) {
@@ -311,7 +323,7 @@ async function getTweet(tweetId) {
         tweet: data?.[1],
         author: data?.[2],
       };
-      console.log(`Got result=${result}, storing in cache`);
+      logging(`Got result=${result}, storing in cache`);
       if (memcached) await memcached.set(key, result, cacheTimeSecs);
       return { ...result, cached: false };
     } else {
@@ -331,11 +343,11 @@ app.get("/tweets/:id", async (req, res) => {
     timestamp: Math.floor(new Date() / 1000),
   })
     .then(() =>
-      console.log(
+      logging(
         `Sent mission=${tweetId} to kafka topic=${options.kafkaTopicTracking}`
       )
     )
-    .catch((e) => console.log("Error sending to kafka", e));
+    .catch((e) => logging("Error sending to kafka" + e));
 
   // Send reply to browser
   getTweet(tweetId)
@@ -360,5 +372,5 @@ app.get("/tweets/:id", async (req, res) => {
 // -------------------------------------------------------
 
 app.listen(options.port, function () {
-  console.log("Node app is running at http://localhost:" + options.port);
+  logging("Node app is running at http://localhost:" + options.port);
 });
