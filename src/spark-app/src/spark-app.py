@@ -5,7 +5,6 @@ from pyspark.sql.types import IntegerType, StringType, StructType, TimestampType
 from model import load_model, train_model
 from database import save_to_database
 from session import spark
-from utils import NoPipelineModelFoundError
 
 logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', datefmt='%y/%m/%d %H:%M:%S')
 logging.getLogger().setLevel(logging.INFO)
@@ -16,8 +15,8 @@ _SLIDING_DURATION = '1 minute'
 # Load or train tweet sentiment prediction model
 try:
     model_pipeline = load_model()
-except NoPipelineModelFoundError:
-    logging.error('No PySpark PipelineModel found. Training model instead.')
+except:
+    logging.info('No PySpark PipelineModel found. Training model instead.')
     model_pipeline = train_model()
 
 # Read messages from Kafka
