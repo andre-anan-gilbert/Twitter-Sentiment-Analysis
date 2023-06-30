@@ -76,7 +76,10 @@ RUN rm -rf /app/dependencies
 
 # Copy application code
 COPY --chown=spark:spark src/*.py /app/
-COPY tweets.1600000.processed.noemoticon.csv /app/
+
+# Copy machine learning training data
+COPY *.csv.gz /app/
+RUN find /app/ -name '*.csv.gz' -print0 | xargs -0 -n1 gzip -d
 
 #------------------------------------
 # Set entrypoint and use dependencies zip file
