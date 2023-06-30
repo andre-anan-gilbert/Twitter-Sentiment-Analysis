@@ -44,13 +44,13 @@ The data is a CSV with emoticons removed. Data file format has 6 fields:
 
 Open Docker Desktop
 
-Start minikube
+To start minikube run:
 
 ```bash
 minikube start
 ```
 
-A running Strimzi.io Kafka operator
+To run a Strimzi.io Kafka operator:
 
 ```bash
 helm repo add strimzi http://strimzi.io/charts/
@@ -58,7 +58,7 @@ helm upgrade --install my-kafka-operator strimzi/strimzi-kafka-operator
 kubectl apply -f https://farberg.de/talks/big-data/code/helm-kafka-operator/kafka-cluster-def.yaml
 ```
 
-A running Hadoop cluster with YARN (for checkpointing)
+To run a Hadoop cluster with YARN (for checkpointing):
 
 ```bash
 helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
@@ -67,18 +67,20 @@ helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=def
 
 ### Deploy
 
-To develop using [Skaffold](https://skaffold.dev/), use `skaffold dev`.
+To develop using [Skaffold](https://skaffold.dev/), run `skaffold dev` from the **src** folder.
 
 ### Access the Application
+
+To enable ingress via Minikube:
 
 ```bash
 minikube addons enable ingress
 minikube tunnel
 ```
 
-Access the application at: http://localhost.
+To access the application visit: http://localhost.
 
-Generate an URL alternatively
+Or generate an URL alternatively:
 
 ```bash
 minikube service popular-slides-service --url
