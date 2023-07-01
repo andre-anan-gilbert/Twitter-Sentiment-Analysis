@@ -243,9 +243,7 @@ async function getTweets() {
     );
     if (data) {
       let result = data.map((row) => row?.[0]);
-      logging(
-        "Got result = " + JSON.stringify.apply(result) + " storing in cache"
-      );
+      logging("Got result = " + JSON.stringify(result) + " storing in cache");
       if (memcached) await memcached.set(key, result, CACHE_TIME_SECONDS);
       return { result, cached: false };
     } else {
@@ -325,7 +323,7 @@ async function getTweet(tweetId) {
         tweet: data?.[1],
         author: data?.[2],
       };
-      logging(`Got result = ${result}, storing in cache`);
+      logging(`Got result = ${JSON.stringify(result)}, storing in cache`);
       if (memcached) await memcached.set(key, result, CACHE_TIME_SECONDS);
       return { ...result, cached: false };
     } else {
@@ -350,7 +348,7 @@ app.get("/tweets/:id", async (req, res) => {
         `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTracking}`
       )
     )
-    .catch((e) => logging("Error sending to kafka " + e));
+    .catch((err) => logging("Error sending to kafka " + err));
 
   // Send reply to browser
   getTweet(tweetId)
@@ -369,6 +367,23 @@ app.get("/tweets/:id", async (req, res) => {
       sendResponse(res, `<h1>Error</h1><p>${err}</p>`, false);
     });
 });
+
+// Simulate data streaming
+setInterval(async () => {
+  const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
+  const tweet = await getTweet(tweetId.toString());
+  sendTrackingMessage({
+    tweet_id: tweet.tweetId,
+    tweet: tweet.tweet,
+    timestamp: Math.floor(new Date() / 1000),
+  })
+    .then(() =>
+      logging(
+        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTracking}`
+      )
+    )
+    .catch((err) => logging("Error sending to kafka " + err));
+}, 3000);
 
 // -------------------------------------------------------
 // Main method
