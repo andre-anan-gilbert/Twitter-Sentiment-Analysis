@@ -27,7 +27,7 @@ def regex_replace(df: pyspark.sql.DataFrame) -> pyspark.sql.DataFrame:
     df = df.withColumn('tweet', F.regexp_replace('tweet', '\xa0', ' '))
 
     # Replace newline characters
-    df = df.withColumn('tweet', F.regexp_replace('tweet', '[\r\n]+', ''))
+    df = df.withColumn('tweet', F.regexp_replace('tweet', '[\r\n]+', ' '))
 
     # Replace mentions
     df = df.withColumn('tweet', F.regexp_replace('tweet', '@\w+', ''))

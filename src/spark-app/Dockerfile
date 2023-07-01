@@ -1,5 +1,4 @@
 FROM bitnami/spark:3.4.1
-LABEL maintainer="Dennis Pfisterer, http://dennis-pfisterer.de"
 
 #------------------------------------
 # Set execution environment
