@@ -1,6 +1,8 @@
 """Database connector."""
 import mysql.connector
 import logging
+import pyspark
+from typing import Iterator
 
 _DB_OPTIONS = {
     "host": "my-app-mariadb-service",
@@ -11,10 +13,10 @@ _DB_OPTIONS = {
 }
 
 
-def save_to_database(batch_df, batch_id):
+def save_to_database(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
     """Saves a batch data frame to MariaDB."""
 
-    def save_to_db(iterator):
+    def save_to_db(iterator: Iterator) -> None:
         """Saves a partition to MariaDB."""
         db_connection = mysql.connector.connect(**_DB_OPTIONS)
         cursor = db_connection.cursor()

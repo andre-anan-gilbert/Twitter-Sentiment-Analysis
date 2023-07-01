@@ -77,7 +77,7 @@ RUN rm -rf /app/dependencies
 # Copy application code
 COPY --chown=spark:spark src/*.py /app/
 
-# Copy machine learning training data
+# Copy tweets data
 COPY *.csv.gz /app/
 RUN find /app/ -name '*.csv.gz' -print0 | xargs -0 -n1 gzip -d
 
