@@ -2,7 +2,7 @@
 import logging
 import pyspark.sql.functions as F
 from pyspark.sql.types import IntegerType, StringType, StructType, TimestampType
-from model import load_model, train_model
+from model import load_model, train_model, regex_replace
 from database import save_to_database
 from session import spark
 
@@ -70,6 +70,7 @@ popular.window.start.alias('window_end')
 popular.window.end.alias('window_start')
 
 # Predict sentiment of tweets
+popular = regex_replace(popular)
 popular = model_pipeline.transform(popular)
 
 # Print running counts to the console

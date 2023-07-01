@@ -14,10 +14,9 @@ _DB_OPTIONS = {
 
 
 def save_to_database(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
-    """Saves a batch data frame to MariaDB."""
+    """Saves a batch to MariaDB."""
 
-    def save_to_db(iterator: Iterator) -> None:
-        """Saves a partition to MariaDB."""
+    def save_partition_to_db(iterator: Iterator) -> None:
         db_connection = mysql.connector.connect(**_DB_OPTIONS)
         cursor = db_connection.cursor()
         for row in iterator:
@@ -37,4 +36,4 @@ def save_to_database(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
     )
 
     # Perform batch upserts per data partition
-    batch_df.foreachPartition(save_to_db)
+    batch_df.foreachPartition(save_partition_to_db)
