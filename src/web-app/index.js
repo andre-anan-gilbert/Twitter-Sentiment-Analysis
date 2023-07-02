@@ -35,13 +35,13 @@ let options = optionparser
   )
   .option(
     "--kafka-topic-tweets <topic>",
-    "Kafka topic to tweets send to",
-    "tweets"
+    "Kafka topic to tracking tweets send to",
+    "tracking-tweets"
   )
   .option(
     "--kafka-topic-events <topic>",
-    "Kafka topic to events send to",
-    "events"
+    "Kafka topic to tracking events send to",
+    "tracking-events"
   )
   .option(
     "--kafka-client-id < id > ",
@@ -209,7 +209,7 @@ function sendResponse(res, html, cachedResult) {
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
 			<script>
         function fetchRandomTweets() {
-          const maxRepetitions = Math.floor(Math.random() * 200)
+          const maxRepetitions = Math.floor(Math.random() * 50)
           document.getElementById("out").innerText = "Fetching " + maxRepetitions + " random tweets, see console output"
             for(var i = 0; i < maxRepetitions; ++i) {
               const tweetId = Math.floor(Math.random() * ${NUMBER_OF_TWEETS})
@@ -313,16 +313,18 @@ app.get("/", (req, res) => {
             <a href='tweets/${pop.tweetId}/clicked'>${pop.author}</a> (${
             pop.count
           } views) - sentiment: ${pop.sentiment === 1 ? "positive" : "negative"}
-          </li>`
+          </li>
+          `
       )
       .join("\n");
 
     const eventsHtml = events
       .map(
-        (event) =>
+        (e) =>
           `<li> 
-          Event: ${event.eventType} tweets (count: ${event.count})
-        </li>`
+            Event: ${e.eventType} tweets (count: ${e.count})
+          </li>
+          `
       )
       .join("\n");
 

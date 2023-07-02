@@ -21,11 +21,9 @@ def save_tweets_to_db(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
         cursor = db_connection.cursor()
         for row in iterator:
             tweet_id, count, prediction = row
-            if tweet_id is None:
-                continue
 
             # Run upsert (insert or update existing data)
-            upsert_statement = 'INSERT INTO popular (tweet_id, sentiment, count) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE count=%s'
+            upsert_statement = 'INSERT INTO popular (tweet_id, sentiment, count) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE count = count + %s'
             cursor.execute(upsert_statement, (tweet_id, prediction, count, count))
             db_connection.commit()
 
@@ -47,11 +45,9 @@ def save_events_to_db(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
         cursor = db_connection.cursor()
         for row in iterator:
             event_type, count = row
-            if event_type is None:
-                continue
 
             # Run upsert (insert or update existing data)
-            upsert_statement = 'INSERT INTO events (event_type, count) VALUES (%s, %s) ON DUPLICATE KEY UPDATE count=%s'
+            upsert_statement = 'INSERT INTO events (event_type, count) VALUES (%s, %s) ON DUPLICATE KEY UPDATE count = count + %s'
             cursor.execute(upsert_statement, (event_type, count, count))
             db_connection.commit()
 

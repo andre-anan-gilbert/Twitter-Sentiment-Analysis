@@ -18,7 +18,7 @@ kafka_tweets_messages = spark.readStream.format('kafka').option(
     'my-cluster-kafka-bootstrap:9092',
 ).option(
     'subscribe',
-    'tweets',
+    'tracking-tweets',
 ).option(
     'startingOffsets',
     'earliest',
@@ -29,7 +29,7 @@ kafka_events_messages = spark.readStream.format('kafka').option(
     'my-cluster-kafka-bootstrap:9092',
 ).option(
     'subscribe',
-    'events',
+    'tracking-events',
 ).option(
     'startingOffsets',
     'earliest',
