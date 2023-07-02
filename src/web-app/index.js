@@ -34,14 +34,20 @@ let options = optionparser
     "my-cluster-kafka-bootstrap:9092"
   )
   .option(
-    "--kafka-topic-tracking <topic>",
-    "Kafka topic to tracking data send to",
-    "tracking-data"
+    "--kafka-topic-tweets <topic>",
+    "Kafka topic to tweets send to",
+    "tweets"
+  )
+  .option(
+    "--kafka-topic-events <topic>",
+    "Kafka topic to events send to",
+    "events"
   )
   .option(
     "--kafka-client-id < id > ",
     "Kafka client ID",
-    "tracker-" + Math.floor(Math.random() * 100000)
+    "my-app"
+    // "tracker-" + Math.floor(Math.random() * 100000)
   )
   // Memcached options
   .option(
@@ -162,13 +168,25 @@ const producer = kafka.producer();
 // End
 
 // Send tracking message to Kafka
-async function sendTrackingMessage(data) {
+async function sendTweetMessage(data) {
   //Ensure the producer is connected
   await producer.connect();
 
   //Send message
   let result = await producer.send({
-    topic: options.kafkaTopicTracking,
+    topic: options.kafkaTopicTweets,
+    messages: [{ value: JSON.stringify(data) }],
+  });
+
+  logging("Send result = " + JSON.stringify(result));
+  return result;
+}
+
+async function sendEventMessage(data) {
+  await producer.connect();
+
+  let result = await producer.send({
+    topic: options.kafkaTopicEvents,
     messages: [{ value: JSON.stringify(data) }],
   });
 
@@ -189,20 +207,19 @@ function sendResponse(res, html, cachedResult) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Big Data Use-Case Demo</title>
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
-      <link type="text/css" rel="stylesheet" href="style.css">
 			<script>
         function fetchRandomTweets() {
           const maxRepetitions = Math.floor(Math.random() * 200)
           document.getElementById("out").innerText = "Fetching " + maxRepetitions + " random tweets, see console output"
             for(var i = 0; i < maxRepetitions; ++i) {
               const tweetId = Math.floor(Math.random() * ${NUMBER_OF_TWEETS})
-              fetch("/tweets/" + tweetId, {cache: 'no-cache'})
+              fetch("/tweets/" + tweetId + "/fetched", {cache: 'no-cache'})
           }
         }
 			</script>
 		</head>
 		<body>
-			<h1 class="heading">Twitter Sentiment Analysis</h1>
+			<h1>Twitter Sentiment Analysis</h1>
 			<p>
 				<a href="javascript: fetchRandomTweets();">Randomly fetch some tweets</a>
 				<span id="out"></span>
@@ -264,15 +281,28 @@ async function getPopular(maxCount) {
   }));
 }
 
+async function getEvents() {
+  return (
+    await executeQuery(
+      "SELECT event_type, count FROM events ORDER BY count DESC",
+      []
+    )
+  ).map((row) => ({
+    eventType: row?.[0],
+    count: row?.[1],
+  }));
+}
+
 // Return HTML for start page
 app.get("/", (req, res) => {
   const topX = 10;
-  Promise.all([getTweets(), getPopular(topX)]).then((values) => {
+  Promise.all([getTweets(), getPopular(topX), getEvents()]).then((values) => {
     const tweets = values[0];
     const popular = values[1];
+    const events = values[2];
 
     const tweetsHtml = tweets.result
-      .map((tweetId) => `<a href='tweets/${tweetId}'>${tweetId}</a>`)
+      .map((tweetId) => `<a href='tweets/${tweetId}/clicked'>${tweetId}</a>`)
       .join(", ");
 
     const popularHtml = popular
@@ -280,10 +310,19 @@ app.get("/", (req, res) => {
         (pop) =>
           `<li> 
             Author:
-            <a href='tweets/${pop.tweetId}'>${pop.author}</a> (${
+            <a href='tweets/${pop.tweetId}/clicked'>${pop.author}</a> (${
             pop.count
-          } views) - sentiment: ${pop.sentiment == 1 ? "positive" : "negative"}
+          } views) - sentiment: ${pop.sentiment === 1 ? "positive" : "negative"}
           </li>`
+      )
+      .join("\n");
+
+    const eventsHtml = events
+      .map(
+        (event) =>
+          `<li> 
+          Event: ${event.eventType} tweets (count: ${event.count})
+        </li>`
       )
       .join("\n");
 
@@ -293,6 +332,10 @@ app.get("/", (req, res) => {
 			<h1>Top ${topX} Tweets</h1>		
 			<p>
 				<ol style="margin-left: 2em;"> ${popularHtml} </ol> 
+			</p>
+      <h1>System Events</h1>		
+			<p>
+				<ol style="margin-left: 2em;"> ${eventsHtml} </ol> 
 			</p>
 		`;
     sendResponse(res, html, tweets.cached);
@@ -332,20 +375,33 @@ async function getTweet(tweetId) {
   }
 }
 
-app.get("/tweets/:id", async (req, res) => {
+app.get("/tweets/:id/:event", async (req, res) => {
+  let event = req.params["event"];
   let tweetId = req.params["id"];
   logging("Fetching tweet id " + tweetId);
+  logging("Event type " + event);
   const tweet = await getTweet(tweetId);
 
   // Send the tracking message to Kafka
-  sendTrackingMessage({
+  sendTweetMessage({
     tweet_id: tweet.tweetId,
     tweet: tweet.tweet,
     timestamp: Math.floor(new Date() / 1000),
   })
     .then(() =>
       logging(
-        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTracking}`
+        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
+      )
+    )
+    .catch((err) => logging("Error sending to kafka " + err));
+
+  sendEventMessage({
+    event_type: event,
+    timestamp: Math.floor(new Date() / 1000),
+  })
+    .then(() =>
+      logging(
+        `Sent event = ${event} tweet to kafka topic = ${options.kafkaTopicEvents}`
       )
     )
     .catch((err) => logging("Error sending to kafka " + err));
@@ -372,18 +428,29 @@ app.get("/tweets/:id", async (req, res) => {
 setInterval(async () => {
   const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
   const tweet = await getTweet(tweetId.toString());
-  sendTrackingMessage({
+  sendTweetMessage({
     tweet_id: tweet.tweetId,
     tweet: tweet.tweet,
     timestamp: Math.floor(new Date() / 1000),
   })
     .then(() =>
       logging(
-        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTracking}`
+        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
       )
     )
     .catch((err) => logging("Error sending to kafka " + err));
-}, 3000);
+
+  sendEventMessage({
+    event_type: "streamed",
+    timestamp: Math.floor(new Date() / 1000),
+  })
+    .then(() =>
+      logging(
+        `Sent event = streamed tweet to kafka topic = ${options.kafkaTopicEvents}`
+      )
+    )
+    .catch((err) => logging("Error sending to kafka " + err));
+}, 5000);
 
 // -------------------------------------------------------
 // Main method

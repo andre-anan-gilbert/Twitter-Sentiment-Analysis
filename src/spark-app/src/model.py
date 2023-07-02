@@ -66,6 +66,7 @@ def _read_data() -> pyspark.sql.DataFrame:
 
     logging.info('Tweets data schema')
     df.printSchema()
+    logging.info(f'Dataset size: {df.count()}')
     return df
 
 
