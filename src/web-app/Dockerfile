@@ -11,7 +11,7 @@ RUN npm install --no-optional && npm cache clean --force
 
 # Install app
 COPY *.js /app/
-COPY *.css /app/
+COPY style.css /app/public/
 
 # Export app port and set entrypoint at startup
 EXPOSE 3000

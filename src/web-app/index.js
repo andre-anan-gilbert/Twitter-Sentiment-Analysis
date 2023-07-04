@@ -205,8 +205,15 @@ function sendResponse(res, html, cachedResult) {
   <head>
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Big Data Use-Case Demo</title>
-			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css">
+			<title>Twitter Sentiment Analysis - Big Data</title>
+			<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css"> -->
+      
+      <!-- Bootstrap and custom styles -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+      <link type="text/css" rel="stylesheet" href="style.css">
+      
+      <link rel="shortcut icon" href="//abs.twimg.com/favicons/twitter.2.ico">
 			<script>
         function fetchRandomTweets() {
           const maxRepetitions = Math.floor(Math.random() * 50)
@@ -219,20 +226,39 @@ function sendResponse(res, html, cachedResult) {
 			</script>
 		</head>
 		<body>
-			<h1>Twitter Sentiment Analysis</h1>
-			<p>
-				<a href="javascript: fetchRandomTweets();">Randomly fetch some tweets</a>
-				<span id="out"></span>
-			</p>
-			${html}
-			<hr>
-			<h2>Information about the generated page</h4>
-			<ul>
-				<li>Server: ${os.hostname()}</li>
-				<li>Date: ${new Date()}</li>
-				<li>Using ${memcachedServers.length} memcached Servers: ${memcachedServers}</li>
-				<li>Cached result: ${cachedResult}</li>
-			</ul>
+      <div class="app-bar">
+        <i class="bi bi-twitter"></i>
+        <h1 class="heading">Sentiment Analyzer</h1>
+        <a class="btn btn-primary" onclick="fetchRandomTweets()" role="button"><i class="bi bi-dice-5"></i> Generate tweet views!</a>
+      </div>
+    
+      <div class="container-fluid">
+          <div class="app-content">
+            <div id="contentRow" class="row">
+              ${html}
+            </div>
+            <div class="row">
+              <div class='col-12'>
+                <div class='content-container'>
+                  <h2>Information about the generated page</h4>
+                  <ul>
+                    <li>Server: ${os.hostname()}</li>
+                    <li>Date: ${new Date()}</li>
+                    <li>Using ${memcachedServers.length} memcached Servers: ${memcachedServers}</li>
+                    <li>Cached result: ${cachedResult}</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <!-- Bundle for bootstrap -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+      <script>
+        // Setting the heigth of the all tweets table contianer using the row.
+        document.getElementById("contentRow").style.height = document.getElementById("topTweets").offsetHeight + "px";
+      </script>
 		</body>
 	</html>
 	`);
@@ -255,11 +281,15 @@ async function getTweets() {
   } else {
     logging(`Cache miss for key = ${key}, querying database`);
     const data = await executeQuery(
-      "SELECT tweet_id FROM tweets ORDER BY tweet_id",
+      "SELECT tweet_id, tweet, author FROM tweets ORDER BY tweet_id",
       []
     );
     if (data) {
-      let result = data.map((row) => row?.[0]);
+      let result = data.map((row) => ({
+        tweetId: row?.[0],
+        tweetContent: row?.[1],
+        userName: row?.[2],
+      }));
       logging("Got result = " + JSON.stringify(result) + " storing in cache");
       if (memcached) await memcached.set(key, result, CACHE_TIME_SECONDS);
       return { result, cached: false };
@@ -293,6 +323,9 @@ async function getEvents() {
   }));
 }
 
+// Use CSS file
+app.use(express.static('public'));
+
 // Return HTML for start page
 app.get("/", (req, res) => {
   const topX = 10;
@@ -301,20 +334,36 @@ app.get("/", (req, res) => {
     const popular = values[1];
     const events = values[2];
 
-    const tweetsHtml = tweets.result
-      .map((tweetId) => `<a href='tweets/${tweetId}/clicked'>${tweetId}</a>`)
-      .join(", ");
-
     const popularHtml = popular
-      .map(
-        (pop) =>
-          `<li> 
-            Author:
-            <a href='tweets/${pop.tweetId}/clicked'>${pop.author}</a> (${
-            pop.count
-          } views) - sentiment: ${pop.sentiment === 1 ? "positive" : "negative"}
+    .map(
+      (pop) =>
+        `<a href='tweets/${pop.tweetId}'>
+          <li>
+            <div class="sentiment-container ${pop.sentiment == 1 ? "positive" : "negative"}-sentiment"></div>
+            <div class="sentiment-shade"></div>
+            <div class="profile-image">
+              <img src="https://pbs.twimg.com/profile_images/1614022060237275136/8rtrzznK_400x400.jpg" alt="User profile picture">
+            </div>
+            <div class="user-info">
+              <p class="user-name">${pop.author}</p>
+              <p class="sentiment-indicator">Sentiment: ${pop.sentiment == 1 ? "positive" : "negative"}</p>
+            </div>
+            <div class="view-count">
+              ${pop.count}
+            </div>
           </li>
-          `
+        </a>`
+      )
+      .join("\n");
+  
+    const tweetsHtml = tweets.result
+      .map(
+        (pop) => 
+          `<tr>
+              <td>${pop.tweetId}</td>
+              <td>${pop.userName}</td>
+              <td class="content-column">${pop.tweetContent}</td>
+          </tr>`
       )
       .join("\n");
 
@@ -328,18 +377,37 @@ app.get("/", (req, res) => {
       )
       .join("\n");
 
-    const html = `
-      <h1>All Tweets</h1>
-      <p> ${tweetsHtml} </p>
-			<h1>Top ${topX} Tweets</h1>		
-			<p>
-				<ol style="margin-left: 2em;"> ${popularHtml} </ol> 
-			</p>
+      const html = `
+      <!-- Top 10 tweets list -->
+      <div class="col-lg-5 col-md-12">
+          <div id="topTweets" class="top-tweets content-container">
+            <h2>Top ${topX} Tweets</h2>
+            <ol> ${popularHtml} </ol>
+            <span id="out"></span>
+          </div>
+      </div>
+  
+      <!-- All tweets list -->
+      <div class="col-lg-7 col-md-12 right-column">
+          <div class="all-tweets content-container">
+            <h2>All Tweets</h2>
+            <div class="table-wrapper">
+              <table>
+                  <tr>
+                      <th>ID</th>
+                      <th>User</th>
+                      <th class="content-column">Content</th>
+                  </tr>
+                  ${tweetsHtml}
+              </table>
+            </div>
+          </div>
+      </div>
       <h1>System Events</h1>		
 			<p>
 				<ol style="margin-left: 2em;"> ${eventsHtml} </ol> 
 			</p>
-		`;
+      `;
     sendResponse(res, html, tweets.cached);
   });
 });
