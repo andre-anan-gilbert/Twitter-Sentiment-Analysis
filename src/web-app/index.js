@@ -223,6 +223,40 @@ function sendResponse(res, html, cachedResult) {
               fetch("/tweets/" + tweetId + "/fetched", {cache: 'no-cache'})
           }
         }
+
+
+        function scrollAndHighlightEntry(number) {
+          // Get the table element
+          var table = document.getElementById("allTweetsTable");
+          
+          // Get all the rows in the table
+          var rows = table.getElementsByTagName("tr");
+          
+          // Loop through the rows to find the matching entry
+          for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            
+            // Get the value in the first column of the current row
+            var firstColumnValue = parseInt(row.cells[0].textContent);
+            
+            // Check if the value matches the input number
+            if (firstColumnValue === number) {
+              // Scroll to the matching row
+              row.scrollIntoView({ behavior: "smooth", block: "center" });
+              
+              // Add a highlight class to the row
+              row.classList.add("highlight");
+              
+              // Remove the highlight class after 3 seconds
+              setTimeout(function() {
+                row.classList.remove("highlight");
+              }, 4000);
+              
+              // Exit the loop since the matching entry is found
+              break;
+            }
+          }
+        }        
 			</script>
 		</head>
 		<body>
@@ -337,7 +371,7 @@ app.get("/", (req, res) => {
     const popularHtml = popular
     .map(
       (pop) =>
-        `<a href='tweets/${pop.tweetId}'>
+        `<a href='javascript:scrollAndHighlightEntry(${pop.tweetId});'>
           <li>
             <div class="sentiment-container ${pop.sentiment == 1 ? "positive" : "negative"}-sentiment"></div>
             <div class="sentiment-shade"></div>
@@ -372,8 +406,7 @@ app.get("/", (req, res) => {
         (e) =>
           `<li> 
             Event: ${e.eventType} tweets (count: ${e.count})
-          </li>
-          `
+          </li>`
       )
       .join("\n");
 
@@ -392,7 +425,7 @@ app.get("/", (req, res) => {
           <div class="all-tweets content-container">
             <h2>All Tweets</h2>
             <div class="table-wrapper">
-              <table>
+              <table id="allTweetsTable">
                   <tr>
                       <th>ID</th>
                       <th>User</th>

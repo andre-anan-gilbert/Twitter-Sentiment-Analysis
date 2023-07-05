@@ -304,20 +304,26 @@ h2 {
   background-color: #eee;
 }
 
-// .tweet-container {
-//   margin-bottom: 10px;
-//   padding: 8px 12px;
-//   min-width: 450px;
-//   color: rgba(0, 0, 0, .8);
-//   border: 1px solid black;
-//   border-radius: 3px;
-//   display: flex;
-//   align-items: center;
-//   transition: 0.3s;
-// }
-
-// .tweet-container:hover {
-//   background-color: #d3d3d3;
-// }
+.highlight {
+  background-color: rgba(29, 155, 240, 0.5);
+  animation-name: fadeOut;
+  animation-duration: 4s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}
 
 /* Page info section */
+
+
+/* Key Frames */
+@keyframes fadeOut {
+  0% {
+    background-color: rgba(29, 155, 240, 0.5)
+  }
+  75% {
+    background-color: rgba(29, 155, 240, 0.5)
+  }
+  100% {
+    background-color: rgba(29, 155, 240, 0)
+  }
+}

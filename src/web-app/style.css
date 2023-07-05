@@ -305,4 +305,24 @@ h2 {
   background-color: #eee;
 }
 
-/* Page info section *//*# sourceMappingURL=style.css.map */
+.highlight {
+  background-color: rgba(29, 155, 240, 0.5);
+  animation-name: fadeOut;
+  animation-duration: 4s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}
+
+/* Page info section */
+/* Key Frames */
+@keyframes fadeOut {
+  0% {
+    background-color: rgba(29, 155, 240, 0.5);
+  }
+  75% {
+    background-color: rgba(29, 155, 240, 0.5);
+  }
+  100% {
+    background-color: rgba(29, 155, 240, 0);
+  }
+}/*# sourceMappingURL=style.css.map */
