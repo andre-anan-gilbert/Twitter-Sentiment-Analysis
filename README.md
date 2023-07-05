@@ -46,7 +46,7 @@ Open Docker Desktop
 To start minikube run:
 
 ```bash
-minikube start
+minikube start --addons=ingress
 ```
 
 To run a Strimzi.io Kafka operator:
@@ -70,10 +70,9 @@ To develop using [Skaffold](https://skaffold.dev/), run `skaffold dev` from the 
 
 ### Access the Application
 
-To enable ingress via Minikube:
+To connect to LoadBalancer services:
 
 ```bash
-minikube addons enable ingress
 minikube tunnel
 ```
 
