@@ -337,12 +337,13 @@ async function getTweets() {
 // Get popular tweets (from db only)
 async function getPopular(maxCount) {
   const query =
-    "SELECT popular.tweet_id, popular.sentiment, popular.count, tweets.author FROM popular JOIN tweets ON tweets.tweet_id = popular.tweet_id ORDER BY count DESC LIMIT ?";
+    "SELECT popular.tweet_id, popular.sentiment, popular.count, tweets.author, tweets.profile_picture_url FROM popular JOIN tweets ON tweets.tweet_id = popular.tweet_id ORDER BY count DESC LIMIT ?";
   return (await executeQuery(query, [maxCount])).map((row) => ({
     tweetId: row?.[0],
     sentiment: row?.[1],
     count: row?.[2],
     author: row?.[3],
+    profile_picture_url: row?.[4],
   }));
 }
 
@@ -388,7 +389,7 @@ app.get("/", (req, res) => {
             <div class="sentiment-container ${pop.sentiment == 1 ? "positive" : "negative"}-sentiment"></div>
             <div class="sentiment-shade"></div>
             <div class="profile-image">
-              <img src="https://pbs.twimg.com/profile_images/1614022060237275136/8rtrzznK_400x400.jpg" alt="User profile picture">
+              <img src="${pop.profile_picture_url}" alt="User profile picture">
             </div>
             <div class="user-info">
               <p class="user-name">${pop.author}</p>
@@ -402,7 +403,6 @@ app.get("/", (req, res) => {
     )
     .join("\n");
 
-    logging("tweeetS: " + popularHtml + ";");
     let showLoadingMessage = false;
     if (!(popularHtml)) {
       showLoadingMessage = true;
