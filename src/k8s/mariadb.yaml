@@ -11,6 +11,7 @@ data:
       `tweet_id` INT NOT NULL,
       `tweet` VARCHAR(280),
       `author` VARCHAR(30),
+      `url` VARCHAR(280),
       PRIMARY KEY (`tweet_id`)
     );
 
@@ -27,36 +28,36 @@ data:
       PRIMARY KEY (`event_type`)
     );
 
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (0, "@sketchbug Lebron is a hometown hero to me, lol I love the Lakers but let's go Cavs, lol", "princezzcutz");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (1, "glad i didnt do Bay to Breakers today, it's 1000 freaking degrees in San Francisco wtf", "Adrigonzo");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (2, "@YarnThing you will not regret going to see Star Trek. It was AWESOME!", "mimknits");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (3, "@morind45 Because the twitter api is slow and most client's aren't good.", "raykolbe");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (4, "RT @SmartChickPDX: Was just told that Nike layoffs started today :-(", "coreysmbpro");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (5, "Can we just go ahead and blow North Korea off the map already?", "utsagrad123");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (6, "I can't wait, going to see star trek tonight!!", "qrboy85");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (7, "Arg. Twitter API is making me crazy.", "rdoc420");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (8, "Only one exam left, and i am so happy for it :D", "laulaulauren");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (9, "argghhhh why won't  my jquery appear in safari bad safari !!!", "TobyJuanKenobi");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (10, "I love my Kindle2. No more stacks of books to trip over on the way to the loo.", "k8tb52");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (11, "dearest @google, you rich bastards! the VISA card you sent me doesn't work. why screw a little guy like me?", "_abi_");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (12, "using Linux and loving it - so much nicer than windows... Looking forward to using the wysiwyg latex editor!", "roguemovement");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (13, "I just created my first LaTeX file from scratch. That didn't work out very well. (See @amandabittner , it's a great time waster)", "rooney_tunes");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (14, "The #Kindle2 seems the best eReader, but will it work in the UK and where can I get one?", "Ant_Ward");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (15, "HATE safeway select green tea icecream! bought two cartons, what a waste of money.", "fugface85");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (16, "yankees won mets lost. its a good day.", "irishyanks");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (17, "Give a man a fish, u feed him for the day. Teach him to fish, u feed him for life. Buy him GM, and u F**K him over for good.", "BarackProblema");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (18, "Yay! Happy place! Place place!  I love Google!", "jackdaniels08");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (19, "Math review. Im going to fail the exam.", "elllllen");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (20, "The day I never have to deal with Comcast again will rank as one of the best days of my life.", "theZoctor");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (21, "Star Trek was as good as everyone said!!", "adamrisser");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (22, "Talk is Cheap: Bing that, I?ll stick with Google.", "StrategisAdv");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (23, "@MMBarnhill yay, glad you got the phone! Still, damn you, AT&amp;T.", "chelseabot");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (24, "@Mbjthegreat i really dont want AT&amp;T phone service..they suck when it comes to having a signal", "nakiasmile");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (25, "We went to Stanford University today. Got a tour. Made me want to go back to college. It's also decided all of our kids will go there.", "TammyT");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (26, "Recovering from surgery..wishing @julesrenner was here :(", "scoralli");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (27, "I am happy for Philip being at GoogleIO today", "maex242");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (28, "@phyreman9 Google is always a good place to look. Should've mentioned I worked on the Mustang w/ my Dad, @KimbleT.", "J_Holl");
-    INSERT INTO tweets (tweet_id, tweet, author) VALUES (29, "good news, just had a call from the Visa office, saying everything is fine.....what a relief! I am sick of scams out there! Stealing!", "DreambigRadio");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (0, "@sketchbug Lebron is a hometown hero to me, lol I love the Lakers but let's go Cavs, lol", "princezzcutz","https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (1, "glad i didnt do Bay to Breakers today, it's 1000 freaking degrees in San Francisco wtf", "Adrigonzo","https://pbs.twimg.com/profile_images/962741817933553664/KuCmH9kM_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (2, "@YarnThing you will not regret going to see Star Trek. It was AWESOME!", "mimknits","https://pbs.twimg.com/profile_images/669961358234877952/hqRQ0o6t_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (3, "@morind45 Because the twitter api is slow and most client's aren't good.", "raykolbe","https://pbs.twimg.com/profile_images/1192258859630571520/DG9Bwhnu_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (4, "RT @SmartChickPDX: Was just told that Nike layoffs started today :-(", "coreysmbpro","https://pbs.twimg.com/profile_images/63853227/me_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (5, "Can we just go ahead and blow North Korea off the map already?", "utsagrad123","https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (6, "I can't wait, going to see star trek tonight!!", "qrboy85","https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (7, "Arg. Twitter API is making me crazy.", "rdoc420",https://pbs.twimg.com/profile_images/133022440/Mobile_016_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (8, "Only one exam left, and i am so happy for it :D", "laulaulauren","https://pbs.twimg.com/profile_images/1520054224037597184/YbGINbma_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (9, "argghhhh why won't  my jquery appear in safari bad safari !!!", "TobyJuanKenobi","https://pbs.twimg.com/profile_images/1002634951530074112/9jVXEY3G_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (10, "I love my Kindle2. No more stacks of books to trip over on the way to the loo.", "k8tb52","https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (11, "dearest @google, you rich bastards! the VISA card you sent me doesn't work. why screw a little guy like me?", "_abi_","https://pbs.twimg.com/profile_images/884161508648800256/B8YHOsnW_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (12, "using Linux and loving it - so much nicer than windows... Looking forward to using the wysiwyg latex editor!", "roguemovement",https://pbs.twimg.com/profile_images/501096564245291009/odGTLuaf_400x400.png);
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (13, "I just created my first LaTeX file from scratch. That didn't work out very well. (See @amandabittner , it's a great time waster)", "rooney_tunes","https://pbs.twimg.com/profile_images/947865611698429952/2lof8CHl_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (14, "The #Kindle2 seems the best eReader, but will it work in the UK and where can I get one?", "Ant_Ward","https://pbs.twimg.com/profile_images/1537175141750255617/1DQicB7-_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (15, "HATE safeway select green tea icecream! bought two cartons, what a waste of money.", "fugface85","https://pbs.twimg.com/profile_images/485667947/Snapshot_20090725_16_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (16, "yankees won mets lost. its a good day.", "irishyanks","https://pbs.twimg.com/profile_images/1665573858521358337/BdGW7R6-_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (17, "Give a man a fish, u feed him for the day. Teach him to fish, u feed him for life. Buy him GM, and u F**K him over for good.", "BarackProblema");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (18, "Yay! Happy place! Place place!  I love Google!", "jackdaniels08","https://pbs.twimg.com/profile_images/1329647526807543809/2SGvnHYV_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (19, "Math review. Im going to fail the exam.", "elllllen","https://pbs.twimg.com/profile_images/1611384509559361537/rtLSzWIR_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (20, "The day I never have to deal with Comcast again will rank as one of the best days of my life.", "theZoctor","https://pbs.twimg.com/profile_images/1311007323347988481/A1r_L9kg_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (21, "Star Trek was as good as everyone said!!", "adamrisser","https://pbs.twimg.com/profile_images/1581866377002254337/sirxh7ut_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (22, "Talk is Cheap: Bing that, I?ll stick with Google.", "StrategisAdv","https://pbs.twimg.com/profile_images/145233621/MDR_and_Jen_400x400.JPG");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (23, "@MMBarnhill yay, glad you got the phone! Still, damn you, AT&amp;T.", "chelseabot","https://pbs.twimg.com/profile_images/418062444439666688/KAqvy2NJ_400x400.jpeg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (24, "@Mbjthegreat i really dont want AT&amp;T phone service..they suck when it comes to having a signal", "nakiasmile","https://pbs.twimg.com/profile_images/1316133260678893570/QI5xebaH_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (25, "We went to Stanford University today. Got a tour. Made me want to go back to college. It's also decided all of our kids will go there.", "TammyT","https://pbs.twimg.com/profile_images/549418022599802881/ZNGidW7U_400x400.jpeg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (26, "Recovering from surgery..wishing @julesrenner was here :(", "scoralli","https://pbs.twimg.com/profile_images/1188906135341948929/BkF1Ws6Y_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (27, "I am happy for Philip being at GoogleIO today", "maex242","https://pbs.twimg.com/profile_images/938263991901609984/cwDpHf2D_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (28, "@phyreman9 Google is always a good place to look. Should've mentioned I worked on the Mustang w/ my Dad, @KimbleT.", "J_Holl","https://pbs.twimg.com/profile_images/1011057346745905152/nAzJk1NJ_400x400.jpg");
+    INSERT INTO tweets (tweet_id, tweet, author, url) VALUES (29, "good news, just had a call from the Visa office, saying everything is fine.....what a relief! I am sick of scams out there! Stealing!", "DreambigRadio","https://pbs.twimg.com/profile_images/755081329608364032/viTqwn78_400x400.jpg");
 
 ---
 apiVersion: apps/v1
