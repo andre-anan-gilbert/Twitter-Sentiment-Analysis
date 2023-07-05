@@ -199,7 +199,7 @@ async function sendEventMessage(data) {
 // HTML helper to send a response to the client
 // -------------------------------------------------------
 
-function sendResponse(res, html, cachedResult) {
+function sendResponse(res, html, cachedResult, loadingHTML) {
   res.send(`<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -209,7 +209,7 @@ function sendResponse(res, html, cachedResult) {
 			<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css"> -->
       
       <!-- Bootstrap and custom styles -->
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
       <link type="text/css" rel="stylesheet" href="style.css">
       
@@ -268,6 +268,7 @@ function sendResponse(res, html, cachedResult) {
     
       <div class="container-fluid">
           <div class="app-content">
+            ${loadingHTML}
             <div id="contentRow" class="row">
               ${html}
             </div>
@@ -288,7 +289,7 @@ function sendResponse(res, html, cachedResult) {
       </div>
 
       <!-- Bundle for bootstrap -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
       <script>
         // Setting the heigth of the all tweets table contianer using the row.
         document.getElementById("contentRow").style.height = document.getElementById("topTweets").offsetHeight + "px";
@@ -367,8 +368,19 @@ app.get("/", (req, res) => {
     const tweets = values[0];
     const popular = values[1];
     const events = values[2];
+  
+    let tweetsHtml = tweets.result
+      .map(
+        (pop) => 
+          `<tr>
+              <td>${pop.tweetId}</td>
+              <td>${pop.userName}</td>
+              <td>${pop.tweetContent}</td>
+          </tr>`
+      )
+      .join("\n");
 
-    const popularHtml = popular
+    let popularHtml = popular
     .map(
       (pop) =>
         `<a href='javascript:scrollAndHighlightEntry(${pop.tweetId});'>
@@ -385,21 +397,29 @@ app.get("/", (req, res) => {
             <div class="view-count">
               ${pop.count}
             </div>
-          </li>
-        </a>`
-      )
-      .join("\n");
-  
-    const tweetsHtml = tweets.result
-      .map(
-        (pop) => 
-          `<tr>
-              <td>${pop.tweetId}</td>
-              <td>${pop.userName}</td>
-              <td class="content-column">${pop.tweetContent}</td>
-          </tr>`
-      )
-      .join("\n");
+        </li>
+      </a>`
+    )
+    .join("\n");
+
+    logging("tweeetS: " + popularHtml + ";");
+    let showLoadingMessage = false;
+    if (!(popularHtml)) {
+      showLoadingMessage = true;
+
+      // Reset content to show loading animations
+      tweetsHtml = `<tr>
+        <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
+        <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
+        <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
+      </tr>`.repeat(30);
+
+      popularHtml = `<a href=''>
+        <li>
+          <div aria-hidden="true" class="placeholder-wave w-75"><span class="placeholder w-100"></span</div>
+        </li>
+      </a>`.repeat(10);
+    }
 
     const eventsHtml = events
       .map(
@@ -408,40 +428,54 @@ app.get("/", (req, res) => {
             Event: ${e.eventType} tweets (count: ${e.count})
           </li>`
       )
-      .join("\n");
+    .join("\n");
 
-      const html = `
-      <!-- Top 10 tweets list -->
-      <div class="col-lg-5 col-md-12">
-          <div id="topTweets" class="top-tweets content-container">
-            <h2>Top ${topX} Tweets</h2>
-            <ol> ${popularHtml} </ol>
-            <span id="out"></span>
+    let loadingHTML = "";
+    if (showLoadingMessage) {
+      loadingHTML = `
+        <div class="no-data-message content-container alert alert-primary" role="alert">
+          <div class="alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+          <div class="alert-content">
+            Waiting for the database to come up and be filled with data...<br>
+            This takes about <b>three minutes</b>. Please <b>refresh</b> in a few seconds!
           </div>
-      </div>
-  
-      <!-- All tweets list -->
-      <div class="col-lg-7 col-md-12 right-column">
-          <div class="all-tweets content-container">
-            <h2>All Tweets</h2>
-            <div class="table-wrapper">
-              <table id="allTweetsTable">
-                  <tr>
-                      <th>ID</th>
-                      <th>User</th>
-                      <th class="content-column">Content</th>
-                  </tr>
-                  ${tweetsHtml}
-              </table>
-            </div>
+        </div>`;
+    } else {
+      loadingHTML = "";
+    }
+
+    const html = `
+    <!-- Top 10 tweets list -->
+    <div class="col-lg-5 col-md-12">
+        <div id="topTweets" class="top-tweets content-container">
+          <h2>Top ${topX} Tweets</h2>
+          <ol> ${popularHtml} </ol>
+          <span id="out"></span>
+        </div>
+    </div>
+
+    <!-- All tweets list -->
+    <div class="col-lg-7 col-md-12 right-column">
+        <div class="all-tweets content-container">
+          <h2>All Tweets</h2>
+          <div class="table-wrapper">
+            <table id="allTweetsTable">
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Content</th>
+                </tr>
+                ${tweetsHtml}
+            </table>
           </div>
-      </div>
-      <h1>System Events</h1>		
-			<p>
-				<ol style="margin-left: 2em;"> ${eventsHtml} </ol> 
-			</p>
-      `;
-    sendResponse(res, html, tweets.cached);
+        </div>
+    </div>
+    <h1>System Events</h1>		
+    <p>
+      <ol style="margin-left: 2em;"> ${eventsHtml} </ol> 
+    </p>
+    `;
+    sendResponse(res, html, tweets.cached, loadingHTML);
   });
 });
 
