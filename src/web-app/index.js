@@ -216,12 +216,14 @@ function sendResponse(res, html, cachedResult, loadingHTML) {
       <link rel="shortcut icon" href="//abs.twimg.com/favicons/twitter.2.ico">
 			<script>
         function fetchRandomTweets() {
-          const maxRepetitions = Math.floor(Math.random() * 50)
-          document.getElementById("out").innerText = "Fetching " + maxRepetitions + " random tweets, see console output"
-            for(var i = 0; i < maxRepetitions; ++i) {
-              const tweetId = Math.floor(Math.random() * ${NUMBER_OF_TWEETS})
-              fetch("/tweets/" + tweetId + "/fetched", {cache: 'no-cache'})
+          const maxRepetitions = Math.floor(Math.random() * 50) + 1; // Avoid fetching zero
+          showMessage(maxRepetitions);
+          for(var i = 0; i < maxRepetitions; ++i) {
+            const tweetId = Math.floor(Math.random() * ${NUMBER_OF_TWEETS})
+            fetch("/tweets/" + tweetId + "/fetched", {cache: 'no-cache'})
           }
+          // await sleep(10000); // Show for 10s and then auto-dismiss
+          // dismissMessage();
         }
 
 
@@ -293,6 +295,23 @@ function sendResponse(res, html, cachedResult, loadingHTML) {
       <script>
         // Setting the heigth of the all tweets table contianer using the row.
         document.getElementById("contentRow").style.height = document.getElementById("topTweets").offsetHeight + "px";
+        
+        let messagePopup = document.getElementById("messagePopup");
+        let timer;
+        function showMessage(maxRepetitions) {
+          document.getElementById("out").innerHTML = "Fetching <b>" + maxRepetitions + "</b> random tweets!";
+          messagePopup.style.display = "flex";
+          messagePopup.style.opacity = 1;
+          clearTimeout(timer);
+          timer = setTimeout(dismissMessage, 10000);
+        }
+
+        let hidePopup = () => messagePopup.style.display = "none";
+
+        function dismissMessage() {
+          messagePopup.style.opacity = 0;
+          setTimeout(hidePopup, 300);
+        }
       </script>
 		</body>
 	</html>
@@ -450,7 +469,6 @@ app.get("/", (req, res) => {
         <div id="topTweets" class="top-tweets content-container">
           <h2>Top ${topX} Tweets</h2>
           <ol> ${popularHtml} </ol>
-          <span id="out"></span>
         </div>
     </div>
 
@@ -470,10 +488,14 @@ app.get("/", (req, res) => {
           </div>
         </div>
     </div>
-    <h1>System Events</h1>		
-    <p>
-      <ol style="margin-left: 2em;"> ${eventsHtml} </ol> 
-    </p>
+    <h1>System Events</h1>
+    <ol style="margin-left: 2em;"> ${eventsHtml} </ol>
+
+    <div id="messagePopup" class="fetch-confirmation alert alert-dismissable fade show" role="alert">
+      <i class="bi bi-check-circle-fill"></i>
+      <span id="out"></span>
+      <button type="button" class="btn-close" onclick="dismissMessage()" aria-label="Close"></button>
+    </div>
     `;
     sendResponse(res, html, tweets.cached, loadingHTML);
   });
