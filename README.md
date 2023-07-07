@@ -38,7 +38,7 @@ This individual components of the setup above are containerized and orchestrated
 - **Deployment**: Manage the pods and their lifecycle.
 - **Ingress**: Routs and manages exernal access to the different components.
 
-  
+![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/kubernetis_resources.png)
 
 Example Kafka message:
 ```json
