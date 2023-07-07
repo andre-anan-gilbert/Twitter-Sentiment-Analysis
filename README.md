@@ -15,10 +15,10 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 1. [Business Use Case](#business-use-case)
 2. [Application Architecture](#application-architecture)
 
-     2.1. [Kubernetes](Kubernetes)
-     2.2. Hallo
+     1. [Kubernetes]()
+     2. [PySpark ML]()
   
-3. [Get Started](#get-started)
+4. [Get Started](#get-started)
 
 ## Business Use Case
 
