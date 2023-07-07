@@ -14,7 +14,8 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 ## Table of Contents
 1. [Business Use Case](#business-use-case)
 2. [Application Architecture](#application-architecture)
-3. [Get Started](#get-started)
+  a. Kubernetes
+4. [Get Started](#get-started)
 
 ## Business Use Case
 
@@ -31,6 +32,9 @@ Moreover the big data application offers an easy to use front end, to allow for 
 The application is build as a kappa architecture compromised of a data ingestion layer, a stream processing system and a serving layer.
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/application_kappa_architecture.png)
+
+
+### Kubernetes
 
 The individual components as seen in the big data application architecture above are containerized and orchestrated using Kubernetes. The individual resources and their functional relationships are shown in the following diagram:
 
