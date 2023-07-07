@@ -47,6 +47,8 @@ The individual components as seen in the big data application architecture above
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/kubernetis_resources.png)
 
+### Kafka
+
 Example Kafka message:
 ```json
 {
@@ -56,9 +58,9 @@ Example Kafka message:
 }
 ```
 
-### Dataset used for PySpark ML
+### PySpark ML
 
-Sentiment140: http://help.sentiment140.com/for-students
+The Sentiment analysis of Twitter posts by the application, is done using a logistic regression algortihm. The final model is trained on the public [Sentiment140](Sentiment140: http://help.sentiment140.com/for-students) dataset, which is structured as follows:
 
 The data is a CSV with emoticons removed. Data file format has 6 fields:
 1. The polarity of the tweet (0 = negative, 2 = neutral, 4 = positive)
