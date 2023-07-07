@@ -169,25 +169,47 @@ const kafka = new Kafka({
 const producer = kafka.producer();
 // End
 
-// Send tracking message to Kafka
-async function sendBatchMessage(tweetMessage, eventMessage) {
+async function sendTweetMessage(data) {
+  //Send message
+  let result = await producer.send({
+    topic: options.kafkaTopicTweets,
+    messages: [{ value: JSON.stringify(data) }],
+  });
+
+  logging("Send result = " + JSON.stringify(result));
+  return result;
+}
+
+async function sendEventMessage(data) {
   await producer.connect();
 
-  const topicMessage = [
-    {
-      topic: options.kafkaTopicTweets,
-      messages: [{ value: JSON.stringify(tweetMessage) }],
-    },
-    {
-      topic: options.kafkaTopicEvents,
-      messages: [{ value: JSON.stringify(eventMessage) }],
-    },
-  ];
+  let result = await producer.send({
+    topic: options.kafkaTopicEvents,
+    messages: [{ value: JSON.stringify(data) }],
+  });
 
-  await producer.sendBatch({ topicMessage });
-  logging("Send result = " + JSON.stringify(topicMessage));
-  return topicMessage;
+  logging("Send result = " + JSON.stringify(result));
+  return result;
 }
+
+// Send tracking message to Kafka
+// async function sendBatchMessage(tweetMessage, eventMessage) {
+//   await producer.connect();
+
+//   const topicMessage = [
+//     {
+//       topic: options.kafkaTopicTweets,
+//       messages: [{ value: JSON.stringify(tweetMessage) }],
+//     },
+//     {
+//       topic: options.kafkaTopicEvents,
+//       messages: [{ value: JSON.stringify(eventMessage) }],
+//     },
+//   ];
+
+//   await producer.sendBatch({ topicMessage });
+//   return topicMessage;
+// }
 // End
 
 // -------------------------------------------------------
@@ -247,7 +269,7 @@ function sendResponse(res, html, cachedResult, loadingHTML) {
               // Remove the highlight class after 3 seconds
               setTimeout(function() {
                 row.classList.remove("highlight");
-              }, 4000);
+              }, 3000);
               
               // Exit the loop since the matching entry is found
               break;
@@ -539,21 +561,42 @@ app.get("/tweets/:id/:event", async (req, res) => {
   let event = req.params["event"];
   let tweetId = req.params["id"];
   const tweet = await getTweet(tweetId);
+  const timestamp = Math.floor(new Date() / 1000);
 
   // Send the tracking message to Kafka
-  const timestamp = Math.floor(new Date() / 1000);
-  sendBatchMessage(
-    {
-      tweet_id: tweet.tweetId,
-      tweet: tweet.tweet,
-      timestamp: timestamp,
-    },
-    { event_type: "streamed", timestamp: timestamp }
-  )
-    .then((result) =>
-      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
+  // sendBatchMessage(
+  //   {
+  //     tweet_id: tweet.tweetId,
+  //     tweet: tweet.tweet,
+  //     timestamp: timestamp,
+  //   },
+  //   { event_type: event, timestamp: timestamp }
+  // )
+  //   .then((result) =>
+  //     logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
+  //   )
+  //   .catch((err) => logging("Error sending to kafka " + err));
+
+  sendTweetMessage({
+    tweet_id: tweet.tweetId,
+    tweet: tweet.tweet,
+    timestamp: timestamp,
+  })
+    .then(() =>
+      logging(
+        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
+      )
     )
     .catch((err) => logging("Error sending to kafka " + err));
+
+  sendEventMessage({
+    event_type: event,
+    timestamp: timestamp,
+  }).then(() =>
+    logging(
+      `Sent event = ${event} tweet to kafka topic = ${options.kafkaTopicEvents}`
+    )
+  );
 
   // Send reply to browser
   getTweet(tweetId)
@@ -577,20 +620,40 @@ app.get("/tweets/:id/:event", async (req, res) => {
 setInterval(async () => {
   const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
   const tweet = await getTweet(tweetId.toString());
-
   const timestamp = Math.floor(new Date() / 1000);
-  sendBatchMessage(
-    {
-      tweet_id: tweet.tweetId,
-      tweet: tweet.tweet,
-      timestamp: timestamp,
-    },
-    { event_type: "streamed", timestamp: timestamp }
-  )
-    .then((result) =>
-      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
+  // sendBatchMessage(
+  //   {
+  //     tweet_id: tweet.tweetId,
+  //     tweet: tweet.tweet,
+  //     timestamp: timestamp,
+  //   },
+  //   { event_type: "streamed", timestamp: timestamp }
+  // )
+  //   .then((result) =>
+  //     logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
+  //   )
+  //   .catch((err) => logging("Error sending to kafka " + err));
+
+  sendTweetMessage({
+    tweet_id: tweet.tweetId,
+    tweet: tweet.tweet,
+    timestamp: timestamp,
+  })
+    .then(() =>
+      logging(
+        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
+      )
     )
     .catch((err) => logging("Error sending to kafka " + err));
+
+  sendEventMessage({
+    event_type: "streamed",
+    timestamp: timestamp,
+  }).then(() =>
+    logging(
+      `Sent event = streamed tweet to kafka topic = ${options.kafkaTopicEvents}`
+    )
+  );
 }, 5000);
 
 // -------------------------------------------------------

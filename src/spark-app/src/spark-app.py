@@ -12,28 +12,39 @@ logging.getLogger().setLevel(logging.INFO)
 _WINDOW_DURATION = '1 minute'
 _SLIDING_DURATION = '1 minute'
 
-# Read messages from Kafka
-kafka_tweets_messages = spark.readStream.format('kafka').option(
+# Read messages from Kafka topics: tracking-tweets, tracking-events
+kafka_messages = spark.readStream.format('kafka').option(
     'kafka.bootstrap.servers',
     'my-cluster-kafka-bootstrap:9092',
 ).option(
-    'subscribe',
-    'tracking-tweets',
+    'subscribePattern',
+    'tracking-*',
 ).option(
     'startingOffsets',
     'earliest',
 ).load()
 
-kafka_events_messages = spark.readStream.format('kafka').option(
-    'kafka.bootstrap.servers',
-    'my-cluster-kafka-bootstrap:9092',
-).option(
-    'subscribe',
-    'tracking-events',
-).option(
-    'startingOffsets',
-    'earliest',
-).load()
+# kafka_tweets_messages = spark.readStream.format('kafka').option(
+#     'kafka.bootstrap.servers',
+#     'my-cluster-kafka-bootstrap:9092',
+# ).option(
+#     'subscribe',
+#     'tracking-tweets',
+# ).option(
+#     'startingOffsets',
+#     'earliest',
+# ).load()
+
+# kafka_events_messages = spark.readStream.format('kafka').option(
+#     'kafka.bootstrap.servers',
+#     'my-cluster-kafka-bootstrap:9092',
+# ).option(
+#     'subscribe',
+#     'tracking-events',
+# ).option(
+#     'startingOffsets',
+#     'earliest',
+# ).load()
 
 # Define schema of tracking data
 tweets_message_schema = StructType().add(
@@ -56,7 +67,8 @@ events_message_schema = StructType().add(
 )
 
 # Convert value: binary -> JSON -> fields + parsed timestamp
-tweets_messages = kafka_tweets_messages.select(
+# kafka_messages.where("topic = 'tracking-tweets'")
+tweets_messages = kafka_messages.where("topic = 'tracking-tweets'").select(
     # Extract 'value' from Kafka message (i.e., the tracking data)
     F.from_json(
         F.column('value').cast('string'),
@@ -71,7 +83,8 @@ tweets_messages = kafka_tweets_messages.select(
         _WINDOW_DURATION,
     )
 
-events_messages = kafka_events_messages.select(
+# kafka_messages.where("topic = 'tracking-events'")
+events_messages = kafka_messages.where("topic = 'tracking-events'").select(
     # Extract 'value' from Kafka message (i.e., the tracking data)
     F.from_json(
         F.column('value').cast('string'),
