@@ -6,6 +6,7 @@ const { Kafka } = require("kafkajs");
 const mariadb = require("mariadb");
 const MemcachePlus = require("memcache-plus");
 const express = require("express");
+const { time, log } = require("console");
 
 const app = express();
 
@@ -47,6 +48,7 @@ let options = optionparser
     "--kafka-client-id < id > ",
     "Kafka client ID",
     "my-app"
+    // Causes: There is no leader for this topic-partition as we are in the middle of a leadership election
     // "tracker-" + Math.floor(Math.random() * 100000)
   )
   // Memcached options
@@ -168,30 +170,23 @@ const producer = kafka.producer();
 // End
 
 // Send tracking message to Kafka
-async function sendTweetMessage(data) {
-  //Ensure the producer is connected
+async function sendBatchMessage(tweetMessage, eventMessage) {
   await producer.connect();
 
-  //Send message
-  let result = await producer.send({
-    topic: options.kafkaTopicTweets,
-    messages: [{ value: JSON.stringify(data) }],
-  });
+  const topicMessage = [
+    {
+      topic: options.kafkaTopicTweets,
+      messages: [{ value: JSON.stringify(tweetMessage) }],
+    },
+    {
+      topic: options.kafkaTopicEvents,
+      messages: [{ value: JSON.stringify(eventMessage) }],
+    },
+  ];
 
-  logging("Send result = " + JSON.stringify(result));
-  return result;
-}
-
-async function sendEventMessage(data) {
-  await producer.connect();
-
-  let result = await producer.send({
-    topic: options.kafkaTopicEvents,
-    messages: [{ value: JSON.stringify(data) }],
-  });
-
-  logging("Send result = " + JSON.stringify(result));
-  return result;
+  await producer.sendBatch({ topicMessage });
+  logging("Send result = " + JSON.stringify(topicMessage));
+  return topicMessage;
 }
 // End
 
@@ -281,7 +276,9 @@ function sendResponse(res, html, cachedResult, loadingHTML) {
                   <ul>
                     <li>Server: ${os.hostname()}</li>
                     <li>Date: ${new Date()}</li>
-                    <li>Using ${memcachedServers.length} memcached Servers: ${memcachedServers}</li>
+                    <li>Using ${
+                      memcachedServers.length
+                    } memcached Servers: ${memcachedServers}</li>
                     <li>Cached result: ${cachedResult}</li>
                   </ul>
                 </div>
@@ -379,7 +376,7 @@ async function getEvents() {
 }
 
 // Use CSS file
-app.use(express.static('public'));
+app.use(express.static("public"));
 
 // Return HTML for start page
 app.get("/", (req, res) => {
@@ -388,10 +385,10 @@ app.get("/", (req, res) => {
     const tweets = values[0];
     const popular = values[1];
     const events = values[2];
-  
+
     let tweetsHtml = tweets.result
       .map(
-        (pop) => 
+        (pop) =>
           `<tr>
               <td>${pop.tweetId}</td>
               <td>${pop.userName}</td>
@@ -401,37 +398,41 @@ app.get("/", (req, res) => {
       .join("\n");
 
     let popularHtml = popular
-    .map(
-      (pop) =>
-        `<a href='javascript:scrollAndHighlightEntry(${pop.tweetId});'>
+      .map(
+        (pop) =>
+          `<a href='javascript:scrollAndHighlightEntry(${pop.tweetId});'>
           <li>
-            <div class="sentiment-container ${pop.sentiment == 1 ? "positive" : "negative"}-sentiment"></div>
+            <div class="sentiment-container ${
+              pop.sentiment == 1 ? "positive" : "negative"
+            }-sentiment"></div>
             <div class="sentiment-shade"></div>
             <div class="profile-image">
               <img src="${pop.profile_picture_url}" alt="User profile picture">
             </div>
             <div class="user-info">
               <p class="user-name">${pop.author}</p>
-              <p class="sentiment-indicator">Sentiment: ${pop.sentiment == 1 ? "positive" : "negative"}</p>
+              <p class="sentiment-indicator">Sentiment: ${
+                pop.sentiment == 1 ? "positive" : "negative"
+              }</p>
             </div>
             <div class="view-count">
               ${pop.count}
             </div>
         </li>
       </a>`
-    )
-    .join("\n");
+      )
+      .join("\n");
 
     let showLoadingMessage = false;
-    if (!(popularHtml)) {
+    if (!popularHtml) {
       showLoadingMessage = true;
 
       // Reset content to show loading animations
-      tweetsHtml = `<tr>
-        <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
-        <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
-        <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
-      </tr>`.repeat(30);
+      // tweetsHtml = `<tr>
+      //   <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
+      //   <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
+      //   <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
+      // </tr>`.repeat(30);
 
       popularHtml = `<a href=''>
         <li>
@@ -447,7 +448,7 @@ app.get("/", (req, res) => {
             Event: ${e.eventType} tweets (count: ${e.count})
           </li>`
       )
-    .join("\n");
+      .join("\n");
 
     let loadingHTML = "";
     if (showLoadingMessage) {
@@ -537,31 +538,20 @@ async function getTweet(tweetId) {
 app.get("/tweets/:id/:event", async (req, res) => {
   let event = req.params["event"];
   let tweetId = req.params["id"];
-  logging("Fetching tweet id " + tweetId);
-  logging("Event type " + event);
   const tweet = await getTweet(tweetId);
 
   // Send the tracking message to Kafka
-  sendTweetMessage({
-    tweet_id: tweet.tweetId,
-    tweet: tweet.tweet,
-    timestamp: Math.floor(new Date() / 1000),
-  })
-    .then(() =>
-      logging(
-        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
-      )
-    )
-    .catch((err) => logging("Error sending to kafka " + err));
-
-  sendEventMessage({
-    event_type: event,
-    timestamp: Math.floor(new Date() / 1000),
-  })
-    .then(() =>
-      logging(
-        `Sent event = ${event} tweet to kafka topic = ${options.kafkaTopicEvents}`
-      )
+  const timestamp = Math.floor(new Date() / 1000);
+  sendBatchMessage(
+    {
+      tweet_id: tweet.tweetId,
+      tweet: tweet.tweet,
+      timestamp: timestamp,
+    },
+    { event_type: "streamed", timestamp: timestamp }
+  )
+    .then((result) =>
+      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
     )
     .catch((err) => logging("Error sending to kafka " + err));
 
@@ -587,26 +577,18 @@ app.get("/tweets/:id/:event", async (req, res) => {
 setInterval(async () => {
   const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
   const tweet = await getTweet(tweetId.toString());
-  sendTweetMessage({
-    tweet_id: tweet.tweetId,
-    tweet: tweet.tweet,
-    timestamp: Math.floor(new Date() / 1000),
-  })
-    .then(() =>
-      logging(
-        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
-      )
-    )
-    .catch((err) => logging("Error sending to kafka " + err));
 
-  sendEventMessage({
-    event_type: "streamed",
-    timestamp: Math.floor(new Date() / 1000),
-  })
-    .then(() =>
-      logging(
-        `Sent event = streamed tweet to kafka topic = ${options.kafkaTopicEvents}`
-      )
+  const timestamp = Math.floor(new Date() / 1000);
+  sendBatchMessage(
+    {
+      tweet_id: tweet.tweetId,
+      tweet: tweet.tweet,
+      timestamp: timestamp,
+    },
+    { event_type: "streamed", timestamp: timestamp }
+  )
+    .then((result) =>
+      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
     )
     .catch((err) => logging("Error sending to kafka " + err));
 }, 5000);
