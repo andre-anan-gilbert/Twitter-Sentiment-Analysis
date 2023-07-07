@@ -16,7 +16,8 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 2. [Application Architecture](#application-architecture)
 
      1. [Kubernetes](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/README.md#kubernetes)
-     2. [PySpark ML]()
+     2. [Kafka](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/README.md#kafka)
+     3. [PySpark ML](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/README.md#pyspark-ml)
   
 4. [Get Started](#get-started)
 
@@ -60,7 +61,7 @@ Example Kafka message:
 
 ### PySpark ML
 
-The Sentiment analysis of Twitter posts by the application, is done using a logistic regression algortihm. The final model is trained on the public [Sentiment140](Sentiment140: http://help.sentiment140.com/for-students) dataset, which is structured as follows:
+The Sentiment analysis of Twitter posts by the application, is done using a logistic regression algortihm. The final model is trained on the public [Sentiment140](http://help.sentiment140.com/for-students) dataset, which is structured as follows:
 
 The data is a CSV with emoticons removed. Data file format has 6 fields:
 1. The polarity of the tweet (0 = negative, 2 = neutral, 4 = positive)
