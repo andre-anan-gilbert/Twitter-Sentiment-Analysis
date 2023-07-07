@@ -28,6 +28,10 @@ Moreover the big data application offers an easy to use front end, to allow for 
 
 ## Application Architecture
 
+The application is build as a kappa architecture compromised of a data ingestion layer, a stream processing system and a serving layer.
+
+
+
 Example Kafka message:
 ```json
 {
