@@ -15,8 +15,8 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 1. [Business Use Case](#business-use-case)
 2. [Application Architecture](#application-architecture)
 
-     - Kubernetes
-     - Hallo
+     2.1. [Kubernetes](Kubernetes)
+     2.2. Hallo
   
 3. [Get Started](#get-started)
 
