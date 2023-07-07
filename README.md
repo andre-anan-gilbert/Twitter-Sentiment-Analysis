@@ -53,21 +53,21 @@ The individual components as seen in the big data application architecture above
 The application has two distinct kafka topics. One for ingesting tweets into the streaming layer (spark) and one for tracking events occuring in the frontend, such as user interaction and engagement.
 
 1. The first Kafka topic used for ingesting tweets is structured as shown in the follwoing examplary message:
-```json
-{
-  "tweet_id": 0,
-  "tweet": "content",
-  "timestamp": 1604325221
-}
-```
+     ```json
+     {
+       "tweet_id": 0,
+       "tweet": "content",
+       "timestamp": 1604325221
+     }
+     ```
 
 2. The second topic which is used to track application events is structured as shown in the follwoing examplary message:
-```json
-{
-  "event_type": ???,
-  "timestamp": 1604326237
-}
-```
+     ```json
+     {
+       "event_type": "streamed", # Other options: "clicked" or "fetched"
+       "timestamp": 1604326237
+     }
+     ```
 
 
 
@@ -92,25 +92,25 @@ Once all docker and minikube are installed, the following steps can be used to g
 1. Start Docker (Open Docker Desktop)
 
 2. Next minikube should be started. To do this, run:
-
-```bash
-minikube start --addons=ingress
-```
+     
+     ```bash
+     minikube start --addons=ingress
+     ```
 
 3. Setup the Strimzi.io Kafka operator:
 
-```bash
-helm repo add strimzi http://strimzi.io/charts/
-helm upgrade --install my-kafka-operator strimzi/strimzi-kafka-operator
-kubectl apply -f https://farberg.de/talks/big-data/code/helm-kafka-operator/kafka-cluster-def.yaml
-```
+     ```bash
+     helm repo add strimzi http://strimzi.io/charts/
+     helm upgrade --install my-kafka-operator strimzi/strimzi-kafka-operator
+     kubectl apply -f https://farberg.de/talks/big-data/code/helm-kafka-operator/kafka-cluster-def.yaml
+     ```
 
 4. Create a Hadoop cluster with YARN (for checkpointing):
 
-```bash
-helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
-helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=default --set hdfs.dataNode.replicas=1 --set yarn.nodeManager.replicas=1 --set hdfs.webhdfs.enabled=true
-```
+     ```bash
+     helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
+     helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=default --set hdfs.dataNode.replicas=1 --set yarn.nodeManager.replicas=1 --set hdfs.webhdfs.enabled=true
+     ```
 
 ### Deploy
 
@@ -129,9 +129,9 @@ There are two ways to connect to the application.
 
 2. Alternatively, you can generate a URL using:
 
-```bash
-minikube service popular-slides-service --url
-```
+     ```bash
+     minikube service popular-slides-service --url
+     ```
 
 ### Troubleshooting
 
