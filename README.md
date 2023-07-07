@@ -64,11 +64,11 @@ The application has two distinct kafka topics. One for ingesting tweets into the
 2. The second topic which is used to track application events is structured as shown in the follwoing examplary message:
      ```json
      {
-       "event_type": "streamed", # Other options: "clicked" or "fetched"
+       "event_type": "streamed", 
        "timestamp": 1604326237
      }
      ```
-
+     Alternative event_types are "clicked" or "fetched".
 
 
 ### PySpark ML
