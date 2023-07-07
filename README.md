@@ -85,15 +85,19 @@ The data is a CSV with emoticons removed. Data file format has 6 fields:
 
 ## Get Started
 
-Open Docker Desktop
+### Prerequisits
 
-To start minikube run:
+Once all docker and minikube are installed, the following steps can be used to get the prerequisits to deploy the application up and running:
+
+1. Start Docker (Open Docker Desktop)
+
+2. Next minikube should be started. To do this, run:
 
 ```bash
 minikube start --addons=ingress
 ```
 
-To run a Strimzi.io Kafka operator:
+3. Setup the Strimzi.io Kafka operator:
 
 ```bash
 helm repo add strimzi http://strimzi.io/charts/
@@ -101,7 +105,7 @@ helm upgrade --install my-kafka-operator strimzi/strimzi-kafka-operator
 kubectl apply -f https://farberg.de/talks/big-data/code/helm-kafka-operator/kafka-cluster-def.yaml
 ```
 
-To run a Hadoop cluster with YARN (for checkpointing):
+4. Create a Hadoop cluster with YARN (for checkpointing):
 
 ```bash
 helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
@@ -110,23 +114,26 @@ helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=def
 
 ### Deploy
 
-To develop using [Skaffold](https://skaffold.dev/), run `skaffold dev` from the **src** folder.
+To develop the application using [Skaffold](https://skaffold.dev/), run `skaffold dev` from the **src** folder.
 
 ### Access the Application
+There are two ways to connect to the application. 
 
-To connect to LoadBalancer services:
+1. To connect to LoadBalancer services, run:
 
 ```bash
 minikube tunnel
 ```
 
-To access the application visit: http://localhost.
+Once this is done, the application can be accessed through: http://localhost.
 
-Or generate an URL alternatively:
+2. Alternatively, you can generate a URL using:
 
 ```bash
 minikube service popular-slides-service --url
 ```
+
+### Troubleshooting
 
 In case an installation command fails, try to update the respective repo using one of the commands below or use the --debug flag with the installation command for further information.
 
@@ -134,8 +141,6 @@ In case an installation command fails, try to update the respective repo using o
 helm repo update strimzi
 helm repo update pfisterer-hadoop
 ```
-
-### Troubleshooting
 
 If issues arise, try to redeploy k8s resources.
 
