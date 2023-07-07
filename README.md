@@ -121,11 +121,11 @@ There are two ways to connect to the application.
 
 1. To connect to LoadBalancer services, run:
 
-```bash
-minikube tunnel
-```
-
-Once this is done, the application can be accessed through: http://localhost.
+     ```bash
+     minikube tunnel
+     ```
+     
+     Once this is done, the application can be accessed through: http://localhost.
 
 2. Alternatively, you can generate a URL using:
 
