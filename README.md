@@ -30,7 +30,7 @@ Moreover the big data application offers an easy to use front end, to allow for 
 
 The application is build as a kappa architecture compromised of a data ingestion layer, a stream processing system and a serving layer.
 
-![application architecture diagram](https://github.com/jhb300/project_submission_haiperformer/blob/main/documentation/project_architecture_v2.png?raw=true)
+![application architecture diagram]([https://github.com/jhb300/project_submission_haiperformer/blob/main/documentation/project_architecture_v2.png?raw=true)
 
 Example Kafka message:
 ```json
