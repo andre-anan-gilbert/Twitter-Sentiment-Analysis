@@ -50,7 +50,9 @@ The individual components as seen in the big data application architecture above
 
 ### Kafka
 
-Example Kafka message:
+The application has two distinct kafka topics. One for ingesting tweets into the streaming layer (spark) and one for tracking events occuring in the frontend, such as user interaction and engagement.
+
+1. The first Kafka topic used for ingesting tweets is structured as shown in the follwoing examplary message:
 ```json
 {
   "tweet_id": 0,
@@ -58,6 +60,16 @@ Example Kafka message:
   "timestamp": 1604325221
 }
 ```
+
+2. The second topic which is used to track application events is structured as shown in the follwoing examplary message:
+```json
+{
+  "event_type": ???,
+  "timestamp": 1604326237
+}
+```
+
+
 
 ### PySpark ML
 
