@@ -17,7 +17,7 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
      2. [Kafka](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/README.md#kafka)
      3. [PySpark ML](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/README.md#pyspark-ml)
   
-4. [Get Started](#get-started)
+3. [Get Started](#get-started)
 
 ## Business Use Case
 
