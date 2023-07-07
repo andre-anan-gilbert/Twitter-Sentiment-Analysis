@@ -19,9 +19,13 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 ## Business Use Case
 
 The business motivation of this project is to create a big data application which enables users to get an overview over trending Twitter post and the sentiment reflected by them. Through this functionality it has utility for personal, academic and corporate use cases. 
+
 It allows personal users to better understand, what for some is, their primary source of information. 
+
 Further, the applicaiton could be used a information basis for researchers to study sentiment of Twitter users toward certain topics and analyse their interactions. 
+
 The application could also be used by commercial users to analyse user behaviour with a brand or a new product, offering valuable marketing insights.
+
 Moreover the big data application offers an easy to use front end, to allow for easy interaction of versatile user groups.
 
 ## Application Architecture
