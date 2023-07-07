@@ -32,7 +32,7 @@ The application is build as a kappa architecture compromised of a data ingestion
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/application_kappa_architecture.png)
 
-This individual components of the setup above are containerized and orchestrated using Kubernetes. The individual resources and their functional relationships are shown in the following:
+The individual components as seen in the big data application architecture above are containerized and orchestrated using Kubernetes. The individual resources and their functional relationships are shown in the following diagram:
 
 - **Service**: Communication gateway to individual pods of a component.
 - **Deployment**: Manage the pods and their lifecycle.
