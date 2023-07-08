@@ -35,6 +35,7 @@ The application is build as a kappa architecture compromised of a data ingestion
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/application_kappa_architecture.png)
 
+In the following some of the components are explained in more detail.
 
 ### Kubernetes
 
