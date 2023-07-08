@@ -46,7 +46,7 @@ In the following, some of the components are explained in more detail.
 The individual components as seen in the big data application architecture above are containerized and orchestrated using Kubernetes. The individual resources and their functional relationships are shown in the following diagram:
 
 - **Service**: Acts as a communication gateway and load balancer for individual pods of a component. It keeps track of the list of IPs of active pods and updates it as pods die and dynamically restart. This is done by using tags, which not only ensures that traffic is forwarded  to the right pods, but also enables seemless rolling deployments by changing the tag assigned to pods with the new version of a container image.
-- **Deployment**: Manage the pods and their lifecycle.
+- **Deployment**: Manages the pods and their lifecycle.
 - **Ingress**: Routs and manages external access to the different components.
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/kubernetis_resources.png)
