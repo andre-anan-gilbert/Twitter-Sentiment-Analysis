@@ -77,7 +77,7 @@ The ingestion into kafka is done using custom parallel batches.
 
 ### PySpark ML
 
-The Sentiment analysis of Twitter posts by the application, is done using a logistic regression algortihm. The final model is trained on the public [Sentiment140](http://help.sentiment140.com/for-students) dataset, which is structured as follows:
+The Sentiment analysis of Twitter posts by the application, is done using a logistic regression algortihm. As a datasource we used the public [Sentiment140](http://help.sentiment140.com/for-students) dataset, which is structured as follows:
 
 The data is a CSV with emoticons removed. Data file format has 6 fields:
 1. The polarity of the tweet (0 = negative, 2 = neutral, 4 = positive)
@@ -86,6 +86,10 @@ The data is a CSV with emoticons removed. Data file format has 6 fields:
 4. The query (lyx). If there is no query, then this value is NO_QUERY.
 5. The user that tweeted (robotickilldozr)
 6. The text of the tweet (Lyx is cool)
+
+Before this data can be used for training the follwoing four preprocessing steps are applied. Firstly, the text field is cleaned using regualer expression, replacing special characters such as HTML codes and removing @mentions, and #tags. Then the data is split into train and test partition, using a 90:10 split. Next, the tweets are tokenzied and vectorized, based on the frequency (count) of each word that occurs in the entire text, using the respective Spark ML native methods. As a last step, IDF (inverse document frequency) is applied.
+
+The train partition is then used to learn the logistic regrssion model used for sentiment classification, which is then evaluated on the test partition.
 
 ## Get Started
 
