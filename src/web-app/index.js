@@ -169,22 +169,25 @@ const producer = kafka.producer();
 // End
 
 // Send tracking message to Kafka
+async function sendMessage(topic, message) {
+  return await producer
+    .send({
+      topic: topic,
+      messages: [{ value: JSON.stringify(message) }],
+    })
+    .then((result) => result);
+}
+
 async function sendBatchMessage(tweetMessage, eventMessage) {
   await producer.connect();
-
-  const topicMessages = [
-    {
-      topic: options.kafkaTopicTweets,
-      messages: [{ value: JSON.stringify(tweetMessage) }],
-    },
-    {
-      topic: options.kafkaTopicEvents,
-      messages: [{ value: JSON.stringify(eventMessage) }],
-    },
-  ];
-
-  topicMessages.forEach(async (message) => await producer.send(message));
-  return topicMessages;
+  Promise.all([
+    sendMessage(options.kafkaTopicTweets, tweetMessage),
+    sendMessage(options.kafkaTopicEvents, eventMessage),
+  ])
+    .then((result) =>
+      logging(`Sent message = ${JSON.stringify(result)} to kafka`)
+    )
+    .catch((err) => logging(`Error sending to kafka ${err}`));
 }
 // End
 
@@ -547,11 +550,7 @@ app.get("/tweets/:id/:event", async (req, res) => {
       timestamp: timestamp,
     },
     { event_type: event, timestamp: timestamp }
-  )
-    .then((result) =>
-      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
-    )
-    .catch((err) => logging("Error sending to kafka " + err));
+  );
 
   // Send reply to browser
   getTweet(tweetId)
@@ -585,11 +584,7 @@ setInterval(async () => {
       timestamp: timestamp,
     },
     { event_type: "streamed", timestamp: timestamp }
-  )
-    .then((result) =>
-      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
-    )
-    .catch((err) => logging("Error sending to kafka " + err));
+  );
 }, 5000);
 
 // -------------------------------------------------------
