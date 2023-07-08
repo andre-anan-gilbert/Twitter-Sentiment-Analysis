@@ -6,7 +6,6 @@ const { Kafka } = require("kafkajs");
 const mariadb = require("mariadb");
 const MemcachePlus = require("memcache-plus");
 const express = require("express");
-const { time, log } = require("console");
 
 const app = express();
 
@@ -169,47 +168,24 @@ const kafka = new Kafka({
 const producer = kafka.producer();
 // End
 
-async function sendTweetMessage(data) {
-  //Send message
-  let result = await producer.send({
-    topic: options.kafkaTopicTweets,
-    messages: [{ value: JSON.stringify(data) }],
-  });
-
-  logging("Send result = " + JSON.stringify(result));
-  return result;
-}
-
-async function sendEventMessage(data) {
+// Send tracking message to Kafka
+async function sendBatchMessage(tweetMessage, eventMessage) {
   await producer.connect();
 
-  let result = await producer.send({
-    topic: options.kafkaTopicEvents,
-    messages: [{ value: JSON.stringify(data) }],
-  });
+  const topicMessages = [
+    {
+      topic: options.kafkaTopicTweets,
+      messages: [{ value: JSON.stringify(tweetMessage) }],
+    },
+    {
+      topic: options.kafkaTopicEvents,
+      messages: [{ value: JSON.stringify(eventMessage) }],
+    },
+  ];
 
-  logging("Send result = " + JSON.stringify(result));
-  return result;
+  topicMessages.forEach(async (message) => await producer.send(message));
+  return topicMessages;
 }
-
-// Send tracking message to Kafka
-// async function sendBatchMessage(tweetMessage, eventMessage) {
-//   await producer.connect();
-
-//   const topicMessage = [
-//     {
-//       topic: options.kafkaTopicTweets,
-//       messages: [{ value: JSON.stringify(tweetMessage) }],
-//     },
-//     {
-//       topic: options.kafkaTopicEvents,
-//       messages: [{ value: JSON.stringify(eventMessage) }],
-//     },
-//   ];
-
-//   await producer.sendBatch({ topicMessage });
-//   return topicMessage;
-// }
 // End
 
 // -------------------------------------------------------
@@ -564,39 +540,18 @@ app.get("/tweets/:id/:event", async (req, res) => {
   const timestamp = Math.floor(new Date() / 1000);
 
   // Send the tracking message to Kafka
-  // sendBatchMessage(
-  //   {
-  //     tweet_id: tweet.tweetId,
-  //     tweet: tweet.tweet,
-  //     timestamp: timestamp,
-  //   },
-  //   { event_type: event, timestamp: timestamp }
-  // )
-  //   .then((result) =>
-  //     logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
-  //   )
-  //   .catch((err) => logging("Error sending to kafka " + err));
-
-  sendTweetMessage({
-    tweet_id: tweet.tweetId,
-    tweet: tweet.tweet,
-    timestamp: timestamp,
-  })
-    .then(() =>
-      logging(
-        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
-      )
+  sendBatchMessage(
+    {
+      tweet_id: tweet.tweetId,
+      tweet: tweet.tweet,
+      timestamp: timestamp,
+    },
+    { event_type: event, timestamp: timestamp }
+  )
+    .then((result) =>
+      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
     )
     .catch((err) => logging("Error sending to kafka " + err));
-
-  sendEventMessage({
-    event_type: event,
-    timestamp: timestamp,
-  }).then(() =>
-    logging(
-      `Sent event = ${event} tweet to kafka topic = ${options.kafkaTopicEvents}`
-    )
-  );
 
   // Send reply to browser
   getTweet(tweetId)
@@ -621,39 +576,20 @@ setInterval(async () => {
   const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
   const tweet = await getTweet(tweetId.toString());
   const timestamp = Math.floor(new Date() / 1000);
-  // sendBatchMessage(
-  //   {
-  //     tweet_id: tweet.tweetId,
-  //     tweet: tweet.tweet,
-  //     timestamp: timestamp,
-  //   },
-  //   { event_type: "streamed", timestamp: timestamp }
-  // )
-  //   .then((result) =>
-  //     logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
-  //   )
-  //   .catch((err) => logging("Error sending to kafka " + err));
 
-  sendTweetMessage({
-    tweet_id: tweet.tweetId,
-    tweet: tweet.tweet,
-    timestamp: timestamp,
-  })
-    .then(() =>
-      logging(
-        `Sent tweet = ${tweetId} to kafka topic = ${options.kafkaTopicTweets}`
-      )
+  // Send the tracking message to Kafka
+  sendBatchMessage(
+    {
+      tweet_id: tweet.tweetId,
+      tweet: tweet.tweet,
+      timestamp: timestamp,
+    },
+    { event_type: "streamed", timestamp: timestamp }
+  )
+    .then((result) =>
+      logging(`Sent batch message = ${JSON.stringify(result)} to kafka`)
     )
     .catch((err) => logging("Error sending to kafka " + err));
-
-  sendEventMessage({
-    event_type: "streamed",
-    timestamp: timestamp,
-  }).then(() =>
-    logging(
-      `Sent event = streamed tweet to kafka topic = ${options.kafkaTopicEvents}`
-    )
-  );
 }, 5000);
 
 // -------------------------------------------------------

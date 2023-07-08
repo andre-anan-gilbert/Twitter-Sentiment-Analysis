@@ -24,28 +24,6 @@ kafka_messages = spark.readStream.format('kafka').option(
     'earliest',
 ).load()
 
-# kafka_tweets_messages = spark.readStream.format('kafka').option(
-#     'kafka.bootstrap.servers',
-#     'my-cluster-kafka-bootstrap:9092',
-# ).option(
-#     'subscribe',
-#     'tracking-tweets',
-# ).option(
-#     'startingOffsets',
-#     'earliest',
-# ).load()
-
-# kafka_events_messages = spark.readStream.format('kafka').option(
-#     'kafka.bootstrap.servers',
-#     'my-cluster-kafka-bootstrap:9092',
-# ).option(
-#     'subscribe',
-#     'tracking-events',
-# ).option(
-#     'startingOffsets',
-#     'earliest',
-# ).load()
-
 # Define schema of tracking data
 tweets_message_schema = StructType().add(
     'tweet_id',
