@@ -78,9 +78,8 @@ The ingestion into kafka is done using custom parallel batches.
 
 ### PySpark ML
 
-The sentiment analysis of Twitter posts by the application is done using a logistic regression algorithm. As a datasource we used the public [Sentiment140](http://help.sentiment140.com/for-students) dataset, which is structured as follows:
+The sentiment analysis of Twitter posts by the application is done using a logistic regression algorithm. As a datasource we used the public [Sentiment140](http://help.sentiment140.com/for-students) dataset, which is a CSV with emoticons removed. The data file format has 6 fields:
 
-The data is a CSV with emoticons removed. The data file format has 6 fields:
 1. The polarity of the tweet (0 = negative, 2 = neutral, 4 = positive)
 2. The id of the tweet (e.g. 2087)
 3. The date of the tweet (e.g. Sat May 16 23:58:44 UTC 2009)
