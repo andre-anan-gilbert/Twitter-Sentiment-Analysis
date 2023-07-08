@@ -19,7 +19,7 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
      3. [PySpark ML](#pyspark-ml)
   
 3. [Get Started](#get-started)
-     1. [Prerequisits](#prerequisits)
+     1. [Prerequisites](#prerequisites)
      2. [Deploy](#deploy)
      3. [Troubleshooting](#troubleshooting)
 
