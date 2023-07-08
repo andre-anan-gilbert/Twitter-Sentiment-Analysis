@@ -136,6 +136,8 @@ There are two ways to connect to the application.
 
 ### Troubleshooting
 
+#### Install
+
 In case an installation command fails, try to update the respective repo using one of the commands below or use the --debug flag with the installation command for further information.
 
 ```bash
@@ -143,11 +145,13 @@ helm repo update strimzi
 helm repo update pfisterer-hadoop
 ```
 
+#### Deployment
+
 If issues arise, try to redeploy k8s resources.
 
 After initial startup it might fail if executed to quickly after starting kafka. Just re-run **skaffold dev** a little bit later.
 
-Here are some commands to completely redeploy Hadoop and Kafka <br />
+If deployment still doesn't work, here are some commands to completely redeploy Hadoop and Kafka <br />
 To delete strimzi resources
 
 ```bash
