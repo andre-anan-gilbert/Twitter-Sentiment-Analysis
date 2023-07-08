@@ -169,21 +169,22 @@ const producer = kafka.producer();
 // End
 
 // Send tracking message to Kafka
-async function sendMessage(topic, message) {
-  return await producer
-    .send({
-      topic: topic,
-      messages: [{ value: JSON.stringify(message) }],
-    })
-    .then((result) => result);
-}
-
 async function sendBatchMessage(tweetMessage, eventMessage) {
   await producer.connect();
-  Promise.all([
-    sendMessage(options.kafkaTopicTweets, tweetMessage),
-    sendMessage(options.kafkaTopicEvents, eventMessage),
-  ])
+
+  const topicMessages = [
+    {
+      topic: options.kafkaTopicTweets,
+      messages: [{ value: JSON.stringify(tweetMessage) }],
+    },
+    {
+      topic: options.kafkaTopicEvents,
+      messages: [{ value: JSON.stringify(eventMessage) }],
+    },
+  ];
+
+  await producer
+    .sendBatch({ topicMessages: topicMessages })
     .then((result) =>
       logging(`Sent message = ${JSON.stringify(result)} to kafka`)
     )
