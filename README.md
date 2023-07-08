@@ -29,9 +29,9 @@ The business motivation of this project is to create a big data application whic
 
 It allows personal users to better understand what, for some, is their primary source of information. 
 Further, the application could be used as an information basis for researchers to study the sentiment of Twitter users towards certain topics and analyse their interactions. 
-The application could also be used by commercial users to analyse user behaviour with a brand or a new product, offering valuable marketing insights.
+In addition to that, the application could also be used by commercial users to analyse user behaviour with a brand or a new product, offering valuable marketing insights.
 
-Moreover, the big data application offers an easy to use front end, to allow for easy interaction of versatile user groups.
+Moreover, the big data application offers an easy-to-use front end, to allow for easy interaction of versatile user groups.
 
 ## Application Architecture
 
