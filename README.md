@@ -35,7 +35,7 @@ Moreover, the big data application offers an easy-to-use front end, to allow for
 
 ## Application Architecture
 
-The application is built as a kappa architecture composed of a data ingestion layer, a stream processing system and a serving layer.
+The application is built as a kappa architecture composed of a data ingestion layer, a stream processing system and a serving layer. First the web app acts as a data producer which sends tweets and application events to the Kafka broker. The spark app consumes the tweets and events, aggregates them, predicts the sentiment of the tweets in the current batch, and saves the result to MariaDB. To prevent data from being pulled from the database every time, memcached is used to store query results in-memory.
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/application_kappa_architecture.png)
 
