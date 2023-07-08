@@ -45,7 +45,6 @@ events_message_schema = StructType().add(
 )
 
 # Convert value: binary -> JSON -> fields + parsed timestamp
-# kafka_messages.where("topic = 'tracking-tweets'")
 tweets_messages = kafka_messages.where("topic = 'tracking-tweets'").select(
     # Extract 'value' from Kafka message (i.e., the tracking data)
     F.from_json(
@@ -61,7 +60,6 @@ tweets_messages = kafka_messages.where("topic = 'tracking-tweets'").select(
         _WINDOW_DURATION,
     )
 
-# kafka_messages.where("topic = 'tracking-events'")
 events_messages = kafka_messages.where("topic = 'tracking-events'").select(
     # Extract 'value' from Kafka message (i.e., the tracking data)
     F.from_json(
