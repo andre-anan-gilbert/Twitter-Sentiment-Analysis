@@ -24,17 +24,17 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 
 ## Business Use Case
 
-The business motivation of this project is to create a big data application which enables users to get an overview over trending Twitter post and the sentiment reflected by them. Through this functionality it has utility for personal, academic and corporate use cases. 
+The business motivation of this project is to create a big data application which enables users to get an overview of trending Twitter posts and the sentiment reflected by them. Through this functionality, it has utility for personal, academic and corporate use cases. 
 
-It allows personal users to better understand, what for some is, their primary source of information. 
-Further, the applicaiton could be used a information basis for researchers to study sentiment of Twitter users toward certain topics and analyse their interactions. 
+It allows personal users to better understand what, for some, is their primary source of information. 
+Further, the application could be used as an information basis for researchers to study the sentiment of Twitter users towards certain topics and analyse their interactions. 
 The application could also be used by commercial users to analyse user behaviour with a brand or a new product, offering valuable marketing insights.
 
-Moreover the big data application offers an easy to use front end, to allow for easy interaction of versatile user groups.
+Moreover, the big data application offers an easy to use front end, to allow for easy interaction of versatile user groups.
 
 ## Application Architecture
 
-The application is build as a kappa architecture compromised of a data ingestion layer, a stream processing system and a serving layer.
+The application is built as a kappa architecture composed of a data ingestion layer, a stream processing system and a serving layer.
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/application_kappa_architecture.png)
 
@@ -46,13 +46,13 @@ The individual components as seen in the big data application architecture above
 
 - **Service**: Acts as a communication gateway and load balancer for individual pods of a component. It keeps track of the list of IPs of active pods and updates it as pods die and dynamically restart. This is done by using tags, which not only ensures that traffic is forwarded  to the right pods, but also enables seemless rolling deployments by changing the tag assigned to pods with the new version of a container image.
 - **Deployment**: Manage the pods and their lifecycle.
-- **Ingress**: Routs and manages exernal access to the different components.
+- **Ingress**: Routs and manages external access to the different components.
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/kubernetis_resources.png)
 
 ### Kafka
 
-The application has two distinct kafka topics. One for ingesting tweets into the streaming layer (spark) and one for tracking events occuring in the frontend, such as user interaction and engagement.
+The application has two distinct kafka topics. One for ingesting tweets into the streaming layer (spark) and one for tracking events occurring in the frontend, such as user interaction and engagement.
 
 1. The first Kafka topic used for ingesting tweets is structured as shown in the follwoing examplary message:
      ```json
