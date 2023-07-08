@@ -121,7 +121,11 @@ Once all docker and minikube are installed, the following steps can be used to g
 
 ### Deploy
 
-To develop the application using [Skaffold](https://skaffold.dev/), run `skaffold dev` from the **src** folder.
+To develop the application using [Skaffold](https://skaffold.dev/), run the following command from the **src** folder:
+
+```bash
+skaffold dev
+```
 
 ### Access the Application
 There are two ways to connect to the application. 
@@ -144,7 +148,7 @@ There are two ways to connect to the application.
 
 #### Install
 
-In case an installation command fails, try to update the respective repo using one of the commands below or use the --debug flag with the installation command for further information.
+In case an installation command fails, try to update the respective helm repo using one of the commands below:
 
 ```bash
 helm repo update strimzi
@@ -155,10 +159,11 @@ helm repo update pfisterer-hadoop
 
 If issues arise, try to redeploy k8s resources.
 
-After initial startup, it might fail if executed too quickly after starting kafka. Just re-run **skaffold dev** a little bit later.
+After initial startup, **skaffold dev** might fail if executed too quickly after starting kafka. Just re-run **skaffold dev** after waiting a short period.
 
-If deployment still doesn't work, here are some commands to completely redeploy Hadoop and Kafka <br />
-To delete strimzi resources
+If deployment still doesn't work, here are some commands to completely redeploy Hadoop and Kafka.
+
+To delete strimzi resources:
 
 ```bash
 // Get resources managed by strimzi
@@ -167,10 +172,9 @@ kubectl get strimzi -o name
 kubectl delete <name>
 ```
 
-To delete helm chart and helm repo
+To delete a helm chart:
 
 ```bash
-// Delete helm chart
 helm list
 helm delete <chartname>
 // Delete helm repo
@@ -178,3 +182,12 @@ helm repo list
 helm repo remove <repo_name>
 // Now you can execute the commands from prequisites again.
 ```
+
+To delete a helm repo:
+
+```bash
+helm repo list
+helm repo remove <repo_name>
+```
+
+Now you can execute the commands from prequisites again.
