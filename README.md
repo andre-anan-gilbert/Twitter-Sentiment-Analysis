@@ -38,7 +38,7 @@ The application is built as a kappa architecture composed of a data ingestion la
 
 ![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/application_kappa_architecture.png)
 
-In the following some of the components are explained in more detail.
+In the following, some of the components are explained in more detail.
 
 ### Kubernetes
 
@@ -54,7 +54,7 @@ The individual components as seen in the big data application architecture above
 
 The application has two distinct kafka topics. One for ingesting tweets into the streaming layer (spark) and one for tracking events occurring in the frontend, such as user interaction and engagement.
 
-1. The first Kafka topic used for ingesting tweets is structured as shown in the follwoing examplary message:
+1. The first Kafka topic used for ingesting tweets is structured as shown in the following exemplary:
      ```json
      {
        "tweet_id": 0,
@@ -63,7 +63,7 @@ The application has two distinct kafka topics. One for ingesting tweets into the
      }
      ```
 
-2. The second topic which is used to track application events is structured as shown in the follwoing examplary message:
+2. The second topic which is used to track application events is structured as shown in the following exemplary message:
      ```json
      {
        "event_type": "streamed", 
@@ -77,9 +77,9 @@ The ingestion into kafka is done using custom parallel batches.
 
 ### PySpark ML
 
-The Sentiment analysis of Twitter posts by the application, is done using a logistic regression algortihm. As a datasource we used the public [Sentiment140](http://help.sentiment140.com/for-students) dataset, which is structured as follows:
+The sentiment analysis of Twitter posts by the application is done using a logistic regression algorithm. As a datasource we used the public [Sentiment140](http://help.sentiment140.com/for-students) dataset, which is structured as follows:
 
-The data is a CSV with emoticons removed. Data file format has 6 fields:
+The data is a CSV with emoticons removed. The data file format has 6 fields:
 1. The polarity of the tweet (0 = negative, 2 = neutral, 4 = positive)
 2. The id of the tweet (2087)
 3. The date of the tweet (Sat May 16 23:58:44 UTC 2009)
@@ -87,15 +87,15 @@ The data is a CSV with emoticons removed. Data file format has 6 fields:
 5. The user that tweeted (robotickilldozr)
 6. The text of the tweet (Lyx is cool)
 
-Before this data can be used for training the follwoing four preprocessing steps are applied. Firstly, the text field is cleaned using regualer expression, replacing special characters such as HTML codes and removing @mentions, and #tags. Then the data is split into train and test partition, using a 90:10 split. Next, the tweets are tokenzied and vectorized, based on the frequency (count) of each word that occurs in the entire text, using the respective Spark ML native methods. As a last step, IDF (inverse document frequency) is applied.
+Before this data can be used for training, the following four preprocessing steps are applied. Firstly, the text field is cleaned using regular expressions, replacing special characters such as HTML codes and removing @mentions, and #tags. Then the data is split into train- and test-partition, using a 90:10 split. Next, the tweets are tokenized and vectorized, based on the frequency (count) of each word that occurs in the entire text, using the respective Spark ML native methods. As a last step, IDF (inverse document frequency) is applied.
 
-The train partition is then used to learn the logistic regrssion model used for sentiment classification, which is then evaluated on the test partition.
+The train partition is then used to learn the logistic regression model used for sentiment classification, which is then evaluated on the test partition.
 
 ## Get Started
 
-### Prerequisits
+### Prerequisites
 
-Once all docker and minikube are installed, the following steps can be used to get the prerequisits to deploy the application up and running:
+Once all docker and minikube are installed, the following steps can be used to get the prerequisites necessary, to deploy the application up and running:
 
 1. Start Docker (Open Docker Desktop)
 
@@ -156,7 +156,7 @@ helm repo update pfisterer-hadoop
 
 If issues arise, try to redeploy k8s resources.
 
-After initial startup it might fail if executed to quickly after starting kafka. Just re-run **skaffold dev** a little bit later.
+After initial startup, it might fail if executed too quickly after starting kafka. Just re-run **skaffold dev** a little bit later.
 
 If deployment still doesn't work, here are some commands to completely redeploy Hadoop and Kafka <br />
 To delete strimzi resources
