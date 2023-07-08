@@ -1,4 +1,4 @@
-<img align="left" width="80" height="80" src="https://raw.githubusercontent.com/akarsh/akarsh-seggemu-resume/master/akarsh%20seggemu%20resume/Assets/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60%403x.png" alt="Resume application project app icon">
+<img align="left" width="80" height="80" src="//abs.twimg.com/favicons/twitter.2.ico" alt="Resume application project app icon">
 # Twitter Sentiment Analysis
 
 The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and PySpark to analyse the sentiment of tweets in real-time using machine learning. The Spark app uses a logistic regression model to predict the polarity of tweets that are streamed via Kafka and the results of the Spark jobs can be viewed via the Express.js app. 
