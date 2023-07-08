@@ -82,11 +82,11 @@ The sentiment analysis of Twitter posts by the application is done using a logis
 
 The data is a CSV with emoticons removed. The data file format has 6 fields:
 1. The polarity of the tweet (0 = negative, 2 = neutral, 4 = positive)
-2. The id of the tweet (2087)
-3. The date of the tweet (Sat May 16 23:58:44 UTC 2009)
+2. The id of the tweet (e.g. 2087)
+3. The date of the tweet (e.g. Sat May 16 23:58:44 UTC 2009)
 4. The query (lyx). If there is no query, then this value is NO_QUERY.
-5. The user that tweeted (robotickilldozr)
-6. The text of the tweet (Lyx is cool)
+5. The user that tweeted (e.g. robotickilldozr)
+6. The text of the tweet (e.g. "Lyx is cool")
 
 Before this data can be used for training, the following four preprocessing steps are applied. Firstly, the text field is cleaned using regular expressions, replacing special characters such as HTML codes and removing @mentions, and #tags. Then the data is split into train- and test-partition, using a 90:10 split. Next, the tweets are tokenized and vectorized, based on the frequency (count) of each word that occurs in the entire text, using the respective Spark ML native methods. As a last step, IDF (inverse document frequency) is applied.
 
