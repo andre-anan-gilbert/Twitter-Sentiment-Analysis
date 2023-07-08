@@ -40,7 +40,7 @@ The application is build as a kappa architecture compromised of a data ingestion
 
 The individual components as seen in the big data application architecture above are containerized and orchestrated using Kubernetes. The individual resources and their functional relationships are shown in the following diagram:
 
-- **Service**: Communication gateway to individual pods of a component.
+- **Service**: Acts as a communication gateway and load balancer for individual pods of a component. It keeps track of the list of IPs of active pods and updates it as pods die and dynamically restart. This is done by using tags, which not only ensures that traffic is forwarded  to the right pods, but also enables seemless rolling deployments by changing the tag assigned to pods with the new version of a container image.
 - **Deployment**: Manage the pods and their lifecycle.
 - **Ingress**: Routs and manages exernal access to the different components.
 
