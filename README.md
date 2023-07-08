@@ -69,6 +69,8 @@ The application has two distinct kafka topics. One for ingesting tweets into the
      ```
      Alternative event_types are "clicked" or "fetched".
 
+The ingestion into kafka is done using custom parallel batches. 
+
 
 ### PySpark ML
 
