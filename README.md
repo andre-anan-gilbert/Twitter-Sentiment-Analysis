@@ -71,7 +71,7 @@ The application has two distinct kafka topics. One for ingesting tweets into the
        "timestamp": 1604326237
      }
      ```
-     Alternative event_types are "clicked" or "fetched".
+     Alternative event types are "clicked" or "fetched".
 
 The ingestion into kafka is done using custom parallel batches. 
 
