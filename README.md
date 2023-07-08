@@ -19,6 +19,8 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
   
 3. [Get Started](#get-started)
      1. [Prerequisits](#prerequisits)
+     2. [Deploy](#deploy)
+     3. [Troubleshooting](#troubleshooting)
 
 ## Business Use Case
 
