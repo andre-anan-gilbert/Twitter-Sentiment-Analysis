@@ -1,5 +1,6 @@
-
 # <img align="left" width="38" height="38" src="https://abs.twimg.com/favicons/twitter.2.ico" alt="Twitter Icon"> Twitter Sentiment Analysis
+
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-globe-americas" viewBox="0 0 16 16">
 
 The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and PySpark to analyse the sentiment of tweets in real-time using machine learning. The Spark app uses a logistic regression model to predict the sentiment of tweets that are streamed via Kafka and the results of the Spark jobs can be viewed via the Express.js app. 
 
