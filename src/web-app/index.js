@@ -196,7 +196,7 @@ async function sendBatchMessage(tweetMessage, eventMessage) {
 // HTML helper to send a response to the client
 // -------------------------------------------------------
 
-function sendResponse(res, html, cachedResult, loadingHTML, eventsHtml) {
+function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
   const getCurrentDateTime = () => new Date().toLocaleString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false});
   res.send(`<!DOCTYPE html>
   <html lang="en">
@@ -210,6 +210,9 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsHtml) {
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
       <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
       <link type="text/css" rel="stylesheet" href="style.css">
+
+      <!-- Apexcharts js -->
+      <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
       
       <link rel="shortcut icon" href="//abs.twimg.com/favicons/twitter.2.ico">
 			<script>
@@ -256,7 +259,7 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsHtml) {
               break;
             }
           }
-        }        
+        }
 			</script>
 		</head>
 		<body>
@@ -277,7 +280,7 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsHtml) {
             <div class="row">
               <div class='col-lg-6 col-md-12'>
                 <div class='content-container'>
-                  <h2>Page-Information</h2>
+                  <h2>Page Information</h2>
                   <div class='page-info-wrapper'>
 
                     <div class="page-info-container">
@@ -316,10 +319,10 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsHtml) {
                 </div>
               </div>
 
-              <div class='col-lg-6 col-md-12'>
-                <div class='content-container'>
+              <div class='col-lg-6 col-md-12 events-container-wrapper'>
+                <div class='content-container events-container'>
                   <h2>System Events</h2>
-                  <ol> ${eventsHtml} </ol>
+                  <div id="eventChart"></div>
                 </div>
               </div>
 
@@ -350,6 +353,48 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsHtml) {
           messagePopup.style.opacity = 0;
           setTimeout(hidePopup, 300);
         }
+
+
+        // Define chart options for events chart
+        var eventChartOptions = {
+          chart: {
+            type: 'bar',
+          },
+          series: [{
+            name: 'View count origin',
+            data: [${(eventsList && eventsList.length) ? eventsList.map(e => e[1]).join(",") : ""}]
+          }],
+          xaxis: {
+            categories: [${(eventsList && eventsList.length) ? eventsList.map(e => "\"" + e[0] + "\"").join(",") : ""}],
+          },
+          yaxis: {
+            labels: {
+              formatter: function (value) {
+                return Number(value).toLocaleString();
+              }
+            }
+          },
+          plotOptions: {
+            bar: {
+              borderRadius: 3,
+              dataLabels: {
+                position: 'center',
+              },
+              colors: {
+                backgroundBarColors: 'rgb(29, 155, 240)',
+                backgroundBarOpacity: 0,
+                barBorderWidth: 0,
+              },
+            }
+          },
+          options: {
+            responsie: true,
+          }
+        };
+
+        // Create the chart
+        var eventChart = new ApexCharts(document.querySelector("#eventChart"), eventChartOptions);
+        eventChart.render();
       </script>
 		</body>
 	</html>
@@ -411,7 +456,7 @@ async function getEvents() {
       []
     )
   ).map((row) => ({
-    eventType: row?.[0],
+    eventType: String(row?.[0]),
     count: row?.[1],
   }));
 }
@@ -468,13 +513,6 @@ app.get("/", (req, res) => {
     if (!popularHtml) {
       showLoadingMessage = true;
 
-      // Reset content to show loading animations
-      // tweetsHtml = `<tr>
-      //   <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
-      //   <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
-      //   <td aria-hidden="true" class="placeholder-wave"><span class="placeholder w-75"></span</td>
-      // </tr>`.repeat(30);
-
       popularHtml = `<a href=''>
         <li>
           <div aria-hidden="true" class="placeholder-wave w-75"><span class="placeholder w-100"></span</div>
@@ -482,14 +520,11 @@ app.get("/", (req, res) => {
       </a>`.repeat(10);
     }
 
-    const eventsHtml = events
-      .map(
-        (e) =>
-          `<li> 
-            Event: ${e.eventType} tweets (count: ${e.count})
-          </li>`
-      )
-      .join("\n");
+    function capitalizeFirstLetter(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    const eventsList = events.map((e) => [capitalizeFirstLetter(e.eventType), e.count]);
 
     let loadingHTML = "";
     if (showLoadingMessage) {
@@ -537,7 +572,7 @@ app.get("/", (req, res) => {
       <button type="button" class="btn-close" onclick="dismissMessage()" aria-label="Close"></button>
     </div>
     `;
-    sendResponse(res, html, tweets.cached, loadingHTML, eventsHtml);
+    sendResponse(res, html, tweets.cached, loadingHTML, eventsList);
   });
 });
 
