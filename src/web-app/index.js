@@ -196,7 +196,8 @@ async function sendBatchMessage(tweetMessage, eventMessage) {
 // HTML helper to send a response to the client
 // -------------------------------------------------------
 
-function sendResponse(res, html, cachedResult, loadingHTML) {
+function sendResponse(res, html, cachedResult, loadingHTML, eventsHtml) {
+  const getCurrentDateTime = () => new Date().toLocaleString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false});
   res.send(`<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -267,25 +268,63 @@ function sendResponse(res, html, cachedResult, loadingHTML) {
     
       <div class="container-fluid">
           <div class="app-content">
+
             ${loadingHTML}
             <div id="contentRow" class="row">
               ${html}
             </div>
+
             <div class="row">
-              <div class='col-12'>
+              <div class='col-lg-6 col-md-12'>
                 <div class='content-container'>
-                  <h2>Information about the generated page</h4>
-                  <ul>
-                    <li>Server: ${os.hostname()}</li>
-                    <li>Date: ${new Date()}</li>
-                    <li>Using ${
-                      memcachedServers.length
-                    } memcached Servers: ${memcachedServers}</li>
-                    <li>Cached result: ${cachedResult}</li>
-                  </ul>
+                  <h2>Page-Information</h2>
+                  <div class='page-info-wrapper'>
+
+                    <div class="page-info-container">
+                      <i class="bi bi-hdd-rack-fill"></i>
+                      <div class="page-info-content">
+                        <p>Server</p>
+                        <p>${os.hostname()}</p>
+                      </div>
+                    </div>
+
+                    <div class="page-info-container">
+                      <i class="bi bi-calendar-date"></i>
+                      <div class="page-info-content">
+                        <p>Generation date</p>
+                        <p>${getCurrentDateTime()}</p>
+                      </div>
+                    </div>
+                    
+                    <div class="page-info-container">
+                      <i class="bi bi-memory"></i>
+                      <div class="page-info-content">
+                        <p>Memcached Servers (${memcachedServers.length})</p>
+                        <p>${memcachedServers.join(" and  ")}</p>
+                      </div>
+                    </div>
+                    
+                    <div class="page-info-container">
+                      <i class="bi bi-menu-button-wide-fill"></i>
+                      <div class="page-info-content">
+                        <p>Result from cache</p>
+                        <p>${cachedResult}</p>
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
               </div>
+
+              <div class='col-lg-6 col-md-12'>
+                <div class='content-container'>
+                  <h2>System Events</h2>
+                  <ol> ${eventsHtml} </ol>
+                </div>
+              </div>
+
             </div>
+
           </div>
       </div>
 
@@ -491,8 +530,6 @@ app.get("/", (req, res) => {
           </div>
         </div>
     </div>
-    <h1>System Events</h1>
-    <ol style="margin-left: 2em;"> ${eventsHtml} </ol>
 
     <div id="messagePopup" class="fetch-confirmation alert alert-dismissable fade show" role="alert">
       <i class="bi bi-check-circle-fill"></i>
@@ -500,7 +537,7 @@ app.get("/", (req, res) => {
       <button type="button" class="btn-close" onclick="dismissMessage()" aria-label="Close"></button>
     </div>
     `;
-    sendResponse(res, html, tweets.cached, loadingHTML);
+    sendResponse(res, html, tweets.cached, loadingHTML, eventsHtml);
   });
 });
 

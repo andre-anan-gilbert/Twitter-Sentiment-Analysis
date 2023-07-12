@@ -16,7 +16,8 @@ body {
   overflow-x: hidden;
   font-size: 18px;
   font-weight: 400;
-  background: url(https://unsplash.com/photos/OPfjYSGOM58/download?ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjg4MTEzMTE2fA&force=true&w=2400) no-repeat;
+  background: rgb(255, 255, 255);
+  background: linear-gradient(191deg, whitesmoke 15%, rgb(27, 143, 221) 100%);
   background-attachment: fixed;
   background-size: cover;
   height: 100vh;
@@ -32,6 +33,8 @@ body {
 
 h2 {
   font-size: 40px;
+  text-align: center;
+  margin: 10px 0px 30px 0px;
 }
 
 .row {
@@ -155,8 +158,7 @@ h2 {
 }
 
 .top-tweets h2 {
-  text-align: center;
-  margin: 10px 0px 30px 0px;
+  margin-bottom: 25px;
 }
 
 .top-tweets ol {
@@ -296,7 +298,7 @@ h2 {
 }
 
 .all-tweets .table-wrapper {
-  height: calc(100% - 77px);
+  height: calc(100% - 95px);
   overflow-y: auto;
   border-radius: 5px;
 }
@@ -363,6 +365,40 @@ h2 {
 }
 
 /* Page info section */
+.page-info-container {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 3px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  padding: 10px;
+  background-color: white;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.page-info-container i.bi {
+  font-size: 32px;
+  margin-left: 8px;
+  margin-right: 16px;
+  color: var(--twitter-blue);
+  opacity: 0.7;
+}
+
+.page-info-content {
+  margin: 0px 10px 0px 0px;
+}
+
+.page-info-content p {
+  margin-bottom: 0;
+}
+
+.page-info-content p:first-child {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+}
+
 /* Key Frames */
 @keyframes fadeOut {
   0% {
