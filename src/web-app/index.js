@@ -260,6 +260,11 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
             }
           }
         }
+        
+        // Generate one click for a certain tweet
+        function generateClick(tweetId) {
+          fetch("/tweets/" + tweetId + "/clicked", {cache: 'no-cache'});
+        }
 			</script>
 		</head>
 		<body>
@@ -475,7 +480,7 @@ app.get("/", (req, res) => {
     let tweetsHtml = tweets.result
       .map(
         (pop) =>
-          `<tr>
+          `<tr onclick="generateClick(${pop.tweetId})">
               <td>${pop.tweetId}</td>
               <td>${pop.userName}</td>
               <td>${pop.tweetContent}</td>

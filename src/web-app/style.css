@@ -336,6 +336,16 @@ h2 {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
+.all-tweets tr:not(:first-child) {
+  cursor: pointer;
+}
+
+.all-tweets tr:not(:first-child):active {
+  animation: pulse 1s;
+  animation-timing-function: ease-in-out;
+  background-color: var(--twitter-blue);
+}
+
 .all-tweets tr:first-child {
   border-top: none;
   position: sticky;
@@ -425,5 +435,16 @@ h2 {
   }
   100% {
     background-color: rgba(29, 155, 240, 0);
+  }
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
   }
 }/*# sourceMappingURL=style.css.map */
