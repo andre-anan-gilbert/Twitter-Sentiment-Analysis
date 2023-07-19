@@ -197,7 +197,17 @@ async function sendBatchMessage(tweetMessage, eventMessage) {
 // -------------------------------------------------------
 
 function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
-  const getCurrentDateTime = () => new Date().toLocaleString('de-DE', {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false});
+  const getCurrentDateTime = () =>
+    new Date().toLocaleString("de-DE", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
   res.send(`<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -217,7 +227,7 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
       <link rel="shortcut icon" href="//abs.twimg.com/favicons/twitter.2.ico">
 			<script>
         function fetchRandomTweets() {
-          const maxRepetitions = Math.floor(Math.random() * 50) + 1; // Avoid fetching zero
+          const maxRepetitions = Math.floor(Math.random() * 10) + 1; // Avoid fetching zero
           showMessage(maxRepetitions);
           for(var i = 0; i < maxRepetitions; ++i) {
             const tweetId = Math.floor(Math.random() * ${NUMBER_OF_TWEETS})
@@ -367,10 +377,18 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
           },
           series: [{
             name: 'View count origin',
-            data: [${(eventsList && eventsList.length) ? eventsList.map(e => e[1]).join(",") : ""}]
+            data: [${
+              eventsList && eventsList.length
+                ? eventsList.map((e) => e[1]).join(",")
+                : ""
+            }]
           }],
           xaxis: {
-            categories: [${(eventsList && eventsList.length) ? eventsList.map(e => "\"" + e[0] + "\"").join(",") : ""}],
+            categories: [${
+              eventsList && eventsList.length
+                ? eventsList.map((e) => '"' + e[0] + '"').join(",")
+                : ""
+            }],
           },
           yaxis: {
             labels: {
@@ -529,7 +547,10 @@ app.get("/", (req, res) => {
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    const eventsList = events.map((e) => [capitalizeFirstLetter(e.eventType), e.count]);
+    const eventsList = events.map((e) => [
+      capitalizeFirstLetter(e.eventType),
+      e.count,
+    ]);
 
     let loadingHTML = "";
     if (showLoadingMessage) {
@@ -649,7 +670,7 @@ app.get("/tweets/:id/:event", async (req, res) => {
 });
 
 // Simulate data streaming
-setInterval(async () => {
+async function streamTweets() {
   const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
   const tweet = await getTweet(tweetId.toString());
   const timestamp = Math.floor(new Date() / 1000);
@@ -663,7 +684,14 @@ setInterval(async () => {
     },
     { event_type: "streamed", timestamp: timestamp }
   );
-}, 5000);
+}
+
+function initialStreamOfTweets() {
+  for (let i = 0; i < 10; i++) streamTweets();
+}
+
+initialStreamOfTweets();
+setInterval(streamTweets, 10000);
 
 // -------------------------------------------------------
 // Main method

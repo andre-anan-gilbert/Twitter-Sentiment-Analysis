@@ -323,7 +323,8 @@ h2 {
   opacity: 0.6;
 }
 
-.all-tweets td, th {
+.all-tweets td,
+th {
   padding: 8px 16px;
 }
 

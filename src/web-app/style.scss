@@ -1,5 +1,5 @@
 /* General Config */
-*{
+* {
   scroll-behavior: smooth;
 }
 
@@ -17,9 +17,13 @@ body {
   font-size: 18px;
   font-weight: 400;
   // background: url(https://unsplash.com/photos/OPfjYSGOM58/download?ixid=M3wxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjg4MTEzMTE2fA&force=true&w=2400) no-repeat;
-  background: rgb(255,255,255);
-  background: linear-gradient(191deg, whitesmoke 15%, rgba(27,143,221,1) 100%); 
-  background-attachment: fixed; 
+  background: rgb(255, 255, 255);
+  background: linear-gradient(
+    191deg,
+    whitesmoke 15%,
+    rgba(27, 143, 221, 1) 100%
+  );
+  background-attachment: fixed;
   background-size: cover;
   height: 100vh;
   padding: 0;
@@ -49,7 +53,7 @@ h2 {
 /* App bar */
 .app-bar {
   width: 100%;
-  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
   font-size: 38px;
   position: fixed;
   z-index: 15;
@@ -61,7 +65,7 @@ h2 {
 }
 
 .app-bar:before {
-  content: '';
+  content: "";
   position: absolute;
   background: inherit;
   z-index: -1;
@@ -69,7 +73,7 @@ h2 {
   left: 0;
   right: 0;
   bottom: 0;
-  box-shadow: inset 0 0 2000px rgba(255, 255, 255, .5);
+  box-shadow: inset 0 0 2000px rgba(255, 255, 255, 0.5);
   filter: blur(10px);
   margin: -10px;
 }
@@ -107,7 +111,7 @@ h2 {
   border-radius: 5px;
   padding: 20px 25px;
   margin: 0px 15px 20px 15px;
-  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, .2);
+  box-shadow: 0 0 1rem 0 rgba(0, 0, 0, 0.2);
 }
 
 .no-data-message {
@@ -172,7 +176,7 @@ h2 {
 .top-tweets li {
   margin-bottom: 15px;
   padding: 8px 12px;
-  color: rgba(0, 0, 0, .8);
+  color: rgba(0, 0, 0, 0.8);
   border: 1px solid rgba(0, 0, 0, 0.16);
   border-radius: 3px;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
@@ -180,7 +184,7 @@ h2 {
   counter-increment: item;
   display: flex;
   align-items: center;
-  background: rgb(255,255,255);
+  background: rgb(255, 255, 255);
   position: relative;
 }
 
@@ -189,7 +193,7 @@ h2 {
   right: 8px;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
-  transition-timing-function: cubic-bezier(.4,0,.2,1);
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .top-tweets li :not(.sentiment-container) {
@@ -235,7 +239,7 @@ h2 {
 
 .top-tweets li::before {
   padding: 0px 5px;
-  color: rgba(0, 0, 0, .4);
+  color: rgba(0, 0, 0, 0.4);
   font-size: 40px;
   font-weight: 200;
   content: counter(item);
@@ -322,17 +326,18 @@ h2 {
   opacity: 0.6;
 }
 
-.all-tweets td, th {
+.all-tweets td,
+th {
   padding: 8px 16px;
 }
 
 .all-tweets tr {
   border-collapse: collapse;
-  transition-duration: .28s;
-  transition-timing-function: cubic-bezier(.4,0,.2,1);
+  transition-duration: 0.28s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-property: background-color;
-  border-top: 1px solid rgba(0,0,0,.12);
-  border-bottom: 1px solid rgba(0,0,0,.12);
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .all-tweets tr:not(:first-child) {
@@ -409,7 +414,6 @@ h2 {
   line-height: 1;
 }
 
-
 .events-container-wrapper {
   display: flex;
 }
@@ -426,17 +430,16 @@ h2 {
   height: 320px;
 }
 
-
 /* Key Frames */
 @keyframes fadeOut {
   0% {
-    background-color: rgba(29, 155, 240, 0.5)
+    background-color: rgba(29, 155, 240, 0.5);
   }
   75% {
-    background-color: rgba(29, 155, 240, 0.5)
+    background-color: rgba(29, 155, 240, 0.5);
   }
   100% {
-    background-color: rgba(29, 155, 240, 0)
+    background-color: rgba(29, 155, 240, 0);
   }
 }
 
