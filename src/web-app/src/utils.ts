@@ -1,10 +1,8 @@
-const moment = require("moment");
+import moment from "moment";
 
-function logging(message) {
+export function logging(message: string) {
   const dateTime = new Date();
   console.log(
     moment(dateTime).format("YY/MM/DD HH:MM:SS") + " INFO " + message
   );
 }
-
-module.exports = { logging };

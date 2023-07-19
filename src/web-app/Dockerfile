@@ -1,17 +1,28 @@
-FROM node:slim
+# Install dependencies only when needed
+FROM node:slim AS deps
+WORKDIR /app
+COPY package*.json .
+RUN npm install
 
-# Set node environment, either development or production
+# Rebuild the source code only when needed
+FROM node:slim AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npm run build
+
+# Production image, copy all the files and run app
+FROM node:slim
+WORKDIR /app
+
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
 
-# Install dependencies
-WORKDIR /app
-COPY package*.json /app/
-RUN npm install --no-optional && npm cache clean --force
+COPY --from=builder /app/style.css ./public/style.css
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/dist ./
 
-# Install app
-COPY src/*.js /app/
-COPY style.css /app/public/
+RUN npm install --only=production
 
 # Export app port and set entrypoint at startup
 EXPOSE 3000

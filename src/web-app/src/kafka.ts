@@ -1,7 +1,7 @@
-const { Kafka } = require("kafkajs");
-const { NUMBER_OF_TWEETS, options } = require("./config.js");
-const { logging } = require("./utils.js");
-const { getTweet } = require("./database.js");
+import { Kafka } from "kafkajs";
+import { NUMBER_OF_TWEETS, options } from "./config";
+import { getTweet } from "./database";
+import { logging } from "./utils";
 
 const kafka = new Kafka({
   clientId: options.kafkaClientId,
@@ -14,7 +14,10 @@ const kafka = new Kafka({
 const producer = kafka.producer();
 
 // Send tracking message to Kafka
-async function sendBatchMessage(tweetMessage, eventMessage) {
+export async function sendBatchMessage(
+  tweetMessage: { tweet_id: any; tweet: string; timestamp: number },
+  eventMessage: { event_type: string; timestamp: number }
+) {
   await producer.connect();
 
   const topicMessages = [
@@ -40,7 +43,7 @@ async function sendBatchMessage(tweetMessage, eventMessage) {
 async function streamTweets() {
   const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
   const tweet = await getTweet(tweetId.toString());
-  const timestamp = Math.floor(new Date() / 1000);
+  const timestamp = Math.floor((new Date() as any) / 1000);
 
   // Send the tracking message to Kafka
   sendBatchMessage(
@@ -59,5 +62,3 @@ function initialStreamOfTweets() {
 
 initialStreamOfTweets();
 setInterval(streamTweets, 10000);
-
-module.exports = { sendBatchMessage };

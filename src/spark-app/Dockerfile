@@ -97,7 +97,6 @@ ENTRYPOINT /opt/bitnami/spark/bin/spark-submit \
 	--jars ${JDBC_JAR_FILE} \
 	--verbose \
 	--files /app/tweets.1600000.processed.noemoticon.csv \
-	--py-files /app/dependencies.zip \
-	/app/spark-app.py
+	--py-files /app/dependencies.zip, /app/spark-app.py
 
 CMD [""]

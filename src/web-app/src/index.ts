@@ -1,30 +1,39 @@
-const os = require("os");
-const express = require("express");
-const { NUMBER_OF_TWEETS, options } = require("./config.js");
-const { getTweets, getPopular, getEvents, getTweet } = require("./database.js");
-const { sendBatchMessage } = require("./kafka.js");
-const { logging } = require("./utils.js");
-const { memcachedServers } = require("./memcache.js");
+import express, { Express, Request, Response } from "express";
+import os from "os";
+import { NUMBER_OF_TWEETS, options } from "./config";
+import { getEvents, getPopular, getTweet, getTweets } from "./database";
+import { sendBatchMessage } from "./kafka";
+import { memcachedServers } from "./memcache";
+import { logging } from "./utils";
 
-const app = express();
+const app: Express = express();
+
+// Use CSS file
+app.use(express.static("public"));
 
 // -------------------------------------------------------
 // HTML helper to send a response to the client
 // -------------------------------------------------------
 
-function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
-  const getCurrentDateTime = () =>
-    new Date().toLocaleString("de-DE", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
+function sendResponse(
+    res: Response,
+    html: string,
+    cachedResult: boolean,
+    loadingHTML: string | undefined,
+    eventsList: any[] | undefined,
+) {
+    const getCurrentDateTime = () =>
+        new Date().toLocaleString("de-DE", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+        });
 
-  res.send(`<!DOCTYPE html>
+    res.send(`<!DOCTYPE html>
   <html lang="en">
   <head>
 			<meta charset="UTF-8">
@@ -193,17 +202,11 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
           },
           series: [{
             name: 'View count origin',
-            data: [${
-              eventsList && eventsList.length
-                ? eventsList.map((e) => e[1]).join(",")
-                : ""
-            }]
+            data: [${eventsList && eventsList.length ? eventsList.map((e: any[]) => e[1]).join(",") : ""}]
           }],
           xaxis: {
             categories: [${
-              eventsList && eventsList.length
-                ? eventsList.map((e) => '"' + e[0] + '"').join(",")
-                : ""
+                eventsList && eventsList.length ? eventsList.map((e: string[]) => '"' + e[0] + '"').join(",") : ""
             }],
           },
           yaxis: {
@@ -240,89 +243,86 @@ function sendResponse(res, html, cachedResult, loadingHTML, eventsList) {
 	`);
 }
 
-// Use CSS file
-app.use(express.static("public"));
-
 // Return HTML for start page
-app.get("/", (req, res) => {
-  const topX = 10;
-  Promise.all([getTweets(), getPopular(topX), getEvents()]).then((values) => {
-    const tweets = values[0];
-    const popular = values[1];
-    const events = values[2];
+app.get("/", (_req: Request, res: Response) => {
+    const topX = 10;
+    Promise.all([getTweets(), getPopular(topX), getEvents()]).then(values => {
+        const tweets = values[0];
+        const popular = values[1];
+        const events = values[2];
 
-    let tweetsHtml = tweets.result
-      .map(
-        (pop) =>
-          `<tr onclick="generateClick(${pop.tweetId})">
-              <td>${pop.tweetId}</td>
-              <td>${pop.userName}</td>
-              <td>${pop.tweetContent}</td>
-          </tr>`
-      )
-      .join("\n");
+        let tweetsHtml = tweets.result
+            .map(
+                (pop: { tweetId: any; userName: any; tweetContent: any }) =>
+                    `<tr onclick="generateClick(${pop.tweetId})">
+                        <td>${pop.tweetId}</td>
+                        <td>${pop.userName}</td>
+                        <td>${pop.tweetContent}</td>
+                    </tr>`,
+            )
+            .join("\n");
 
-    let popularHtml = popular
-      .map(
-        (pop) =>
-          `<a href='javascript:scrollAndHighlightEntry(${pop.tweetId});'>
-          <li>
-            <div class="sentiment-container ${
-              pop.sentiment == 1 ? "positive" : "negative"
-            }-sentiment"></div>
-            <div class="sentiment-shade"></div>
-            <div class="profile-image">
-              <img src="${pop.profile_picture_url}" alt="User profile picture">
-            </div>
-            <div class="user-info">
-              <p class="user-name">${pop.author}</p>
-              <p class="sentiment-indicator">Sentiment: ${
-                pop.sentiment == 1 ? "positive" : "negative"
-              }</p>
-            </div>
-            <div class="view-count">
-              ${pop.count}
-            </div>
-        </li>
-      </a>`
-      )
-      .join("\n");
+        let popularHtml = popular
+            .map(
+                (pop: { tweetId: any; sentiment: number; profile_picture_url: any; author: any; count: any }) =>
+                    `<a href='javascript:scrollAndHighlightEntry(${pop.tweetId});'>
+                      <li>
+                        <div class="sentiment-container ${
+                            pop.sentiment == 1 ? "positive" : "negative"
+                        }-sentiment"></div>
+                        <div class="sentiment-shade"></div>
+                        <div class="profile-image">
+                          <img src="${pop.profile_picture_url}" alt="User profile picture">
+                        </div>
+                        <div class="user-info">
+                          <p class="user-name">${pop.author}</p>
+                          <p class="sentiment-indicator">Sentiment: ${pop.sentiment == 1 ? "positive" : "negative"}</p>
+                        </div>
+                        <div class="view-count">
+                          ${pop.count}
+                        </div>
+                    </li>
+                  </a>`,
+            )
+            .join("\n");
 
-    let showLoadingMessage = false;
-    if (!popularHtml) {
-      showLoadingMessage = true;
+        let showLoadingMessage = false;
+        if (!popularHtml) {
+            showLoadingMessage = true;
 
-      popularHtml = `<a href=''>
-        <li>
-          <div aria-hidden="true" class="placeholder-wave w-75"><span class="placeholder w-100"></span</div>
-        </li>
-      </a>`.repeat(10);
-    }
+            popularHtml = `
+                <a href=''>
+                  <li>
+                    <div aria-hidden="true" class="placeholder-wave w-75"><span class="placeholder w-100"></span</div>
+                  </li>
+                </a>
+            `.repeat(10);
+        }
 
-    function capitalizeFirstLetter(str) {
-      return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+        function capitalizeFirstLetter(str: string) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
 
-    const eventsList = events.map((e) => [
-      capitalizeFirstLetter(e.eventType),
-      e.count,
-    ]);
+        const eventsList = events.map((e: { eventType: string; count: number }) => [
+            capitalizeFirstLetter(e.eventType),
+            e.count,
+        ]);
 
-    let loadingHTML = "";
-    if (showLoadingMessage) {
-      loadingHTML = `
-        <div class="no-data-message content-container alert alert-primary" role="alert">
-          <div class="alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-          <div class="alert-content">
-            Waiting for the database to come up and be filled with data...<br>
-            This takes about <b>three minutes</b>. Please <b>refresh</b> in a few seconds!
-          </div>
-        </div>`;
-    } else {
-      loadingHTML = "";
-    }
+        let loadingHTML = "";
+        if (showLoadingMessage) {
+            loadingHTML = `
+                <div class="no-data-message content-container alert alert-primary" role="alert">
+                    <div class="alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                    <div class="alert-content">
+                        Waiting for the database to come up and be filled with data...<br>
+                        This takes about <b>three minutes</b>. Please <b>refresh</b> in a few seconds!
+                    </div>
+                </div>`;
+        } else {
+            loadingHTML = "";
+        }
 
-    const html = `
+        const html = `
     <!-- Top 10 tweets list -->
     <div class="col-lg-5 col-md-12">
         <div id="topTweets" class="top-tweets content-container">
@@ -354,42 +354,25 @@ app.get("/", (req, res) => {
       <button type="button" class="btn-close" onclick="dismissMessage()" aria-label="Close"></button>
     </div>
     `;
-    sendResponse(res, html, tweets.cached, loadingHTML, eventsList);
-  });
+        sendResponse(res, html, tweets.cached, loadingHTML, eventsList);
+    });
 });
 
-app.get("/tweets/:id/:event", async (req, res) => {
-  let event = req.params["event"];
-  let tweetId = req.params["id"];
-  const tweet = await getTweet(tweetId);
-  const timestamp = Math.floor(new Date() / 1000);
+app.get("/tweets/:id/:event", async (req: Request, _res: Response) => {
+    let event = req.params["event"];
+    let tweetId = req.params["id"];
+    const tweet = await getTweet(tweetId);
+    const timestamp = Math.floor((new Date() as any) / 1000);
 
-  // Send the tracking message to Kafka
-  sendBatchMessage(
-    {
-      tweet_id: tweet.tweetId,
-      tweet: tweet.tweet,
-      timestamp: timestamp,
-    },
-    { event_type: event, timestamp: timestamp }
-  );
-
-  // Send reply to browser
-  getTweet(tweetId)
-    .then((data) => {
-      sendResponse(
-        res,
-        `<h1>${data.tweetId}</h1><p>${data.author}</p>` +
-          data.tweet
-            .split("\n")
-            .map((p) => `<p>${p}</p>`)
-            .join("\n"),
-        data.cached
-      );
-    })
-    .catch((err) => {
-      sendResponse(res, `<h1>Error</h1><p>${err}</p>`, false);
-    });
+    // Send the tracking message to Kafka
+    sendBatchMessage(
+        {
+            tweet_id: tweet.tweetId,
+            tweet: tweet.tweet,
+            timestamp: timestamp,
+        },
+        { event_type: event, timestamp: timestamp },
+    );
 });
 
 // -------------------------------------------------------
@@ -397,5 +380,5 @@ app.get("/tweets/:id/:event", async (req, res) => {
 // -------------------------------------------------------
 
 app.listen(options.port, function () {
-  logging("Node app is running at http://localhost:" + options.port);
+    logging("Node app is running at http://localhost:" + options.port);
 });
