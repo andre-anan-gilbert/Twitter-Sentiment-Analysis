@@ -364,6 +364,8 @@ app.get("/tweets/:id/:event", async (req: Request, _res: Response) => {
     const tweet = await getTweet(tweetId);
     const timestamp = Math.floor((new Date() as any) / 1000);
 
+    console.log("here", event);
+
     // Send the tracking message to Kafka
     sendBatchMessage(
         {

@@ -18,7 +18,7 @@ WORKDIR /app
 ARG NODE_ENV=production
 ENV NODE_ENV $NODE_ENV
 
-COPY --from=builder /app/style.css ./public/style.css
+COPY --from=builder /app/public/style.css ./public/style.css
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/dist ./
 
