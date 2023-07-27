@@ -1,11 +1,11 @@
 # <img width="25" height="25" src="https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg" alt="Twitter Icon"> Twitter Sentiment Analysis
 
-
-The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and PySpark to analyse the sentiment of tweets in real-time using machine learning. The Spark app uses a logistic regression model to predict the sentiment of tweets that are streamed via Kafka and the results of the Spark jobs can be viewed via the Express.js app. 
+The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and PySpark to analyse the sentiment of tweets in real-time using machine learning. The Spark app uses a logistic regression model to predict the sentiment of tweets that are streamed via Kafka and the results of the Spark jobs can be viewed via the Express.js app.
 
 https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/assets/59315862/215677f9-bc7f-4fed-9d86-e708e8bb781f
 
 ## Contributors
+
 - André Anan Gilbert (3465546)
 - David Hoffmann (2571020)
 - Jan Henrik Bertrand (8556462)
@@ -13,24 +13,25 @@ https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/assets/59315862/2156
 - Felix Noll (9467152)
 
 ## Table of Contents
+
 1. [Business Use Case](#business-use-case)
 2. [Application Architecture](#application-architecture)
 
-     1. [Kubernetes](#kubernetes)
-     2. [Kafka](#kafka)
-     3. [PySpark ML](#pyspark-ml)
-  
+   1. [Kubernetes](#kubernetes)
+   2. [Kafka](#kafka)
+   3. [PySpark ML](#pyspark-ml)
+
 3. [Get Started](#get-started)
-     1. [Prerequisites](#prerequisites)
-     2. [Deploy](#deploy)
-     3. [Troubleshooting](#troubleshooting)
+   1. [Prerequisites](#prerequisites)
+   2. [Deploy](#deploy)
+   3. [Troubleshooting](#troubleshooting)
 
 ## Business Use Case
 
-The business motivation of this project is to create a big data application which enables users to get an overview of trending Twitter posts and the sentiment reflected by them. Through this functionality, it has utility for personal, academic and corporate use cases. 
+The business motivation of this project is to create a big data application which enables users to get an overview of trending Twitter posts and the sentiment reflected by them. Through this functionality, it has utility for personal, academic and corporate use cases.
 
-It allows personal users to better understand what, for some, is their primary source of information. 
-Further, the application could be used as an information basis for researchers to study the sentiment of Twitter users towards certain topics and analyse their interactions. 
+It allows personal users to better understand what, for some, is their primary source of information.
+Further, the application could be used as an information basis for researchers to study the sentiment of Twitter users towards certain topics and analyse their interactions.
 In addition to that, the application could also be used by commercial users to analyse user behaviour with a brand or a new product, offering valuable marketing insights.
 
 Moreover, the big data application offers an easy-to-use front end, to allow for easy interaction of versatile user groups.
@@ -39,7 +40,7 @@ Moreover, the big data application offers an easy-to-use front end, to allow for
 
 The application is built as a kappa architecture composed of a data ingestion layer, a stream processing system and a serving layer. First the web app acts as a data producer which sends tweets and application events to the Kafka broker. The spark app consumes the tweets and events, aggregates them, predicts the sentiment of the tweets in the current batch, and saves the result to MariaDB. To avoid data from being pulled from the database every time, memcached is used to store query results in-memory.
 
-![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/application_kappa_architecture.png)
+![application architecture diagram](/docs/application_kappa_architecture.png)
 
 In the following, some of the components are explained in more detail.
 
@@ -47,33 +48,34 @@ In the following, some of the components are explained in more detail.
 
 The individual components as seen in the big data application architecture above are containerized and orchestrated using Kubernetes. The individual resources and their functional relationships are shown in the following diagram:
 
-- **Service**: Acts as a communication gateway and load balancer for individual pods of a component. It keeps track of the list of IPs of active pods and updates it as pods die and dynamically restart. This is done by using tags, which not only ensures that traffic is forwarded  to the right pods, but also enables seemless rolling deployments by changing the tag assigned to pods with the new version of a container image.
+- **Service**: Acts as a communication gateway and load balancer for individual pods of a component. It keeps track of the list of IPs of active pods and updates it as pods die and dynamically restart. This is done by using tags, which not only ensures that traffic is forwarded to the right pods, but also enables seemless rolling deployments by changing the tag assigned to pods with the new version of a container image.
 - **Deployment**: Manages the pods and their lifecycle.
 - **Ingress**: Routs and manages external access to the different components.
 
-![application architecture diagram](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/kubernetis_resources.png)
+![application architecture diagram](/docs/kubernetis_resources.png)
 
 ### Kafka
 
 The application has two distinct kafka topics. One for ingesting tweets into the streaming layer (spark) and one for tracking events occurring in the frontend, such as user interaction and engagement.
 
 1. The first Kafka topic used for ingesting tweets is structured as shown in the following exemplary:
-     ```json
-     {
-       "tweet_id": 0,
-       "tweet": "content",
-       "timestamp": 1604325221
-     }
-     ```
+
+   ```json
+   {
+     "tweet_id": 0,
+     "tweet": "content",
+     "timestamp": 1604325221
+   }
+   ```
 
 2. The second topic which is used to track application events is structured as shown in the following exemplary message:
-     ```json
-     {
-       "event_type": "streamed", 
-       "timestamp": 1604326237
-     }
-     ```
-     Alternative event types are "clicked" or "fetched".
+   ```json
+   {
+     "event_type": "streamed",
+     "timestamp": 1604326237
+   }
+   ```
+   Alternative event types are "clicked" or "fetched".
 
 To produce to multiple topics at the same time, the ingestion into kafka is done via a batch.
 
@@ -101,25 +103,25 @@ Once all docker and minikube are installed, the following steps can be used to g
 1. Start Docker (Open Docker Desktop)
 
 2. Next minikube should be started. To do this, run:
-     
-     ```bash
-     minikube start --addons=ingress
-     ```
+
+   ```bash
+   minikube start --addons=ingress
+   ```
 
 3. Setup the Strimzi.io Kafka operator:
 
-     ```bash
-     helm repo add strimzi http://strimzi.io/charts/
-     helm upgrade --install my-kafka-operator strimzi/strimzi-kafka-operator
-     kubectl apply -f https://farberg.de/talks/big-data/code/helm-kafka-operator/kafka-cluster-def.yaml
-     ```
+   ```bash
+   helm repo add strimzi http://strimzi.io/charts/
+   helm upgrade --install my-kafka-operator strimzi/strimzi-kafka-operator
+   kubectl apply -f https://farberg.de/talks/big-data/code/helm-kafka-operator/kafka-cluster-def.yaml
+   ```
 
 4. Create a Hadoop cluster with YARN (for checkpointing):
 
-     ```bash
-     helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
-     helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=default --set hdfs.dataNode.replicas=1 --set yarn.nodeManager.replicas=1 --set hdfs.webhdfs.enabled=true
-     ```
+   ```bash
+   helm repo add pfisterer-hadoop https://pfisterer.github.io/apache-hadoop-helm/
+   helm upgrade --install my-hadoop-cluster pfisterer-hadoop/hadoop --namespace=default --set hdfs.dataNode.replicas=1 --set yarn.nodeManager.replicas=1 --set hdfs.webhdfs.enabled=true
+   ```
 
 ### Deploy
 
@@ -130,21 +132,22 @@ skaffold dev
 ```
 
 ### Access the Application
-There are two ways to connect to the application. 
+
+There are two ways to connect to the application.
 
 1. To connect to LoadBalancer services, run:
 
-     ```bash
-     minikube tunnel
-     ```
-     
-     Once this is done, the application can be accessed through: http://localhost.
+   ```bash
+   minikube tunnel
+   ```
+
+   Once this is done, the application can be accessed through: http://localhost.
 
 2. Alternatively, you can generate a URL using:
 
-     ```bash
-     minikube service popular-slides-service --url
-     ```
+   ```bash
+   minikube service popular-slides-service --url
+   ```
 
 ### Troubleshooting
 
