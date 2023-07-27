@@ -28,7 +28,7 @@ async function executeQuery(query: string, data: QueryData) {
     }
 }
 
-type Tweet = (number | string)[];
+type Row = (number | string)[];
 
 /** Queries all tweets. */
 export async function getTweets() {
@@ -41,7 +41,7 @@ export async function getTweets() {
     logging(`Cache miss for key = ${key}, querying database`);
     const data = await executeQuery("SELECT tweet_id, tweet, author FROM tweets ORDER BY tweet_id", []);
     if (!data) throw "No tweets data found";
-    const result = data.map((row: Tweet[]) => ({
+    const result = data.map((row: Row[]) => ({
         tweetId: row?.[0],
         tweetContent: row?.[1],
         username: row?.[2],
@@ -65,7 +65,7 @@ export async function getPopular(topXTweets: number) {
         LIMIT ?
     `;
     const result = await executeQuery(query, [topXTweets]);
-    return result.map((row: Tweet[]) => ({
+    return result.map((row: Row[]) => ({
         tweetId: row?.[0],
         sentiment: row?.[1],
         tweetViews: row?.[2],
@@ -74,12 +74,10 @@ export async function getPopular(topXTweets: number) {
     }));
 }
 
-type Event = (string | number)[];
-
 /** Queries all events. */
 export async function getEvents() {
     const result = await executeQuery("SELECT event_type, count FROM events ORDER BY count DESC", []);
-    return result.map((row: Event[]) => ({
+    return result.map((row: Row[]) => ({
         eventType: row?.[0],
         count: row?.[1],
     }));
