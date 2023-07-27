@@ -29,10 +29,10 @@ def regex_replace(df: pyspark.sql.DataFrame) -> pyspark.sql.DataFrame:
     # Replace newline characters
     df = df.withColumn('tweet', F.regexp_replace('tweet', '[\r\n]+', ' '))
 
-    # Replace mentions
+    # Remove mentions
     df = df.withColumn('tweet', F.regexp_replace('tweet', '@\w+', ''))
 
-    # Replace hashtags
+    # Remove hashtags
     df = df.withColumn('tweet', F.regexp_replace('tweet', '#\w+', ''))
 
     # Replace whitespace
@@ -50,6 +50,8 @@ def _read_data() -> pyspark.sql.DataFrame:
         StructField('author', StringType(), True),
         StructField('tweet', StringType(), True),
     ])
+
+    # Read tweets data from driver’s HTTP file server
     df = spark.read.csv(
         'file:///app/tweets.1600000.processed.noemoticon.csv',
         inferSchema=True,
@@ -62,6 +64,7 @@ def _read_data() -> pyspark.sql.DataFrame:
     # Remove neutral tweets
     df = df.where(df.polarity != 2)
 
+    # Standardize tweets using regex
     df = regex_replace(df)
 
     logging.info('Tweets data schema')
@@ -71,7 +74,14 @@ def _read_data() -> pyspark.sql.DataFrame:
 
 
 def _split_data(df: pyspark.sql.DataFrame) -> tuple[pyspark.sql.DataFrame, ...]:
-    """Splits data into train and test sets."""
+    """Splits data into train and test sets.
+    
+    Args:
+        df: The data frame containing the loaded tweets data.
+
+    Returns:
+        A tuple containing the train and test sets.
+    """
     logging.info('Splitting data into train/test')
     df_train, df_test = df.randomSplit([0.90, 0.10], seed=42)
     logging.info('Data distribution')
@@ -85,7 +95,15 @@ def _split_data(df: pyspark.sql.DataFrame) -> tuple[pyspark.sql.DataFrame, ...]:
 
 
 def _preprocess_data(df_train: pyspark.sql.DataFrame, df_test: pyspark.sql.DataFrame) -> dict[str, tuple[Any, ...]]:
-    """Transforms data into the expected format of the ML model."""
+    """Transforms data into the expected format of the ML model.
+    
+    Args:
+        df_train: The data used for model training.
+        df_test: The data used for model evaluation.
+
+    Return:
+        A dictionary containing the PySpark data frames and the transformers used for preprocessing.
+    """
 
     # Converts the input string to lowercase and then splits it by white spaces
     # Row(text='a b c', words=['a', 'b', 'c'])
@@ -129,7 +147,11 @@ def _preprocess_data(df_train: pyspark.sql.DataFrame, df_test: pyspark.sql.DataF
 
 
 def _get_metrics(predictions: pyspark.sql.DataFrame) -> None:
-    """Logs the metrics of the trained model."""
+    """Logs the metrics of the trained model.
+    
+    Args:
+        predictions: The data frame containing the sentiment prediction.
+    """
     evaluator = BinaryClassificationEvaluator(rawPredictionCol='rawPrediction', labelCol='label')
     auc = evaluator.evaluate(predictions)
 
@@ -146,7 +168,14 @@ def _get_metrics(predictions: pyspark.sql.DataFrame) -> None:
 
 
 def _save_model(*stages: list[pyspark.ml.base.Transformer]) -> pyspark.ml.PipelineModel:
-    """Saves a pipeline model to hdfs."""
+    """Saves a pipeline model to hdfs.
+
+    Args:
+        *stages: A list of transformers and fitted models.
+
+    Returns:
+        A PySpark PipelineModel.
+    """
     logging.info('Saving model')
     model_pipeline = PipelineModel(stages=[*stages])
     model_pipeline.write().overwrite().save(_MODEL_PATH)
@@ -176,6 +205,8 @@ def train_model() -> pyspark.ml.PipelineModel:
     logging.info('Prediction schema')
     predictions.printSchema()
 
+    # Saves a machine learning pipeline containing: 
+    # tokenizer, count vectorizer, inverse document frequency, and logistic regression model
     model_pipeline = _save_model(*preprocessing['preprocessing_steps'], model)
     return model_pipeline
 

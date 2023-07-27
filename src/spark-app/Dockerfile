@@ -1,16 +1,11 @@
 FROM bitnami/spark:3.4.1
 
-#------------------------------------
 # Set execution environment
-
 ENV SPARK_VERSION "3.4.1"
 
-#------------------------------------
 # Download Java dependencies (Kafka, MariaDB) using Ivy (cf. https://stackoverflow.com/a/15456621) 
-
 ENV IVY_PACKAGE_DIR "/tmp/.ivy"
 ENV EXTRA_JAR_PATH "/opt/bitnami/spark/jars"
-
 ENV IVY_CMD "java -Divy.default.ivy.user.dir=/tmp/.ivy-home -jar ${EXTRA_JAR_PATH}/ivy-*.jar -verbose -cache ${IVY_PACKAGE_DIR} -retrieve ${EXTRA_JAR_PATH}/[artifact]-[revision](-[classifier]).[ext]"
 
 # Dependencies for Spark Kafka
@@ -26,9 +21,6 @@ ENV JDBC_JAR_FILE "${EXTRA_JAR_PATH}/mysql-connector-java-${MYSQL_DB_VERSION}.ja
 # Delete temp dir
 RUN rm -rf ${IVY_PACKAGE_DIR}
 
-#------------------------------------
-# Prepare the system
-
 WORKDIR /app/
 USER root
 
@@ -36,7 +28,6 @@ USER root
 # cf. https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login/56083736
 RUN groupadd --gid 1001 spark
 RUN useradd --uid 1001 --gid spark --shell /bin/bash spark
-# End: Workaround
 
 RUN apt-get update && apt-get install -y zip
 
@@ -47,9 +38,6 @@ RUN chown spark:spark /app/
 
 USER spark
 WORKDIR /app
-
-#------------------------------------
-# Prepare dependencies in ZIP file
 
 # Prefetch Maven dependencies by running an empty python file using spark-submit
 # to benefit from Docker's build cache
@@ -70,28 +58,14 @@ RUN zip -r /app/dependencies.zip .
 WORKDIR /app
 RUN rm -rf /app/dependencies
 
-#------------------------------------
-# Copy the application code into the container
-
 # Copy application code
 COPY --chown=spark:spark src/*.py /app/
 
 # Copy tweets data
-COPY *.csv.gz /app/
+COPY /data/*.csv.gz /app/
 RUN find /app/ -name '*.csv.gz' -print0 | xargs -0 -n1 gzip -d
 
-#------------------------------------
-# Set entrypoint and use dependencies zip file
-
-# Use YARN deployment in client mode (requires Hadoop config)
-# --master yarn --deploy-mode client"
-
-# Use YARN deployment in cluster mode (requires Hadoop config)
-# --master yarn --deploy-mode cluster
-
-# Use local deployment
-# --master local
-
+# Set entrypoint and use dependencies zip file and tweets data
 ENTRYPOINT /opt/bitnami/spark/bin/spark-submit \
 	--master local \
 	--jars ${JDBC_JAR_FILE} \

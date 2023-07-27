@@ -1,23 +1,18 @@
-import { program as optionParser } from "commander";
+/** The application configuration. */
+import { program } from "commander";
 
-export const CACHE_TIME_SECONDS = 15;
-export const NUMBER_OF_TWEETS = 30;
-
-export const options = optionParser
+export const options = program
     .storeOptionsAsProperties(true)
     // Web server
     .option("--port <port>", "Web server port", "3000")
+    .option("--cache-time <s>", "Memcached cache time in seconds", "15")
+    .option("--top-x-tweets <count>", "Number of popular tweets to query", "10")
+    .option("--number-of-tweets <count>", "Number of tweets in MariaDB", "30")
     // Kafka options
     .option("--kafka-broker <host:port>", "Kafka bootstrap host:port", "my-cluster-kafka-bootstrap:9092")
     .option("--kafka-topic-tweets <topic>", "Kafka topic to tracking tweets send to", "tracking-tweets")
     .option("--kafka-topic-events <topic>", "Kafka topic to tracking events send to", "tracking-events")
-    .option(
-        "--kafka-client-id <id>",
-        "Kafka client ID",
-        "my-app",
-        // Causes: There is no leader for this topic-partition as we are in the middle of a leadership election
-        // "tracker-" + Math.floor(Math.random() * 100000)
-    )
+    .option("--kafka-client-id <id>", "Kafka client ID", "my-app")
     // Memcached options
     .option(
         "--memcached-hostname <hostname>",

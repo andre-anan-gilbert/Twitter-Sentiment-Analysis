@@ -1,29 +1,28 @@
-import express, { Express, Request, Response } from "express";
+/** Web server. */
+import express, { Request, Response } from "express";
 import os from "os";
-import { NUMBER_OF_TWEETS, options } from "./config";
+import { options } from "./config";
 import { getEvents, getPopular, getTweet, getTweets } from "./database";
 import { sendBatchMessage } from "./kafka";
-import { memcachedServers } from "./memcache";
+import { memcachedServers } from "./memcached";
 import { logging } from "./utils";
 
-const app: Express = express();
+const app = express();
 
 // Use CSS file
 app.use(express.static("public"));
 
-// -------------------------------------------------------
-// HTML helper to send a response to the client
-// -------------------------------------------------------
-
-function sendResponse(
-    res: Response,
-    html: string,
-    cachedResult: boolean,
-    loadingHTML: string | undefined,
-    eventsList: any[] | undefined,
-) {
-    const getCurrentDateTime = () =>
-        new Date().toLocaleString("de-DE", {
+/**
+ * The web page content.
+ * @param res The response to send to the browser.
+ * @param html The tweets content.
+ * @param cachedResult Indicates if the values rendered come from memcached.
+ * @param loadingHTML The initial loading container of popular tweets.
+ * @param eventsList The system events to be rendered as a bar chart.
+ */
+function sendResponse(res: Response, html: string, cachedResult: boolean, loadingHTML: string, eventsList: EventsList) {
+    const getCurrentDateTime = () => {
+        return new Date().toLocaleString("de-DE", {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
@@ -32,282 +31,301 @@ function sendResponse(
             second: "2-digit",
             hour12: false,
         });
+    };
 
-    res.send(`<!DOCTYPE html>
-  <html lang="en">
-  <head>
-			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Twitter Sentiment Analysis - Big Data</title>
-			<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css"> -->
-      
-      <!-- Bootstrap and custom styles -->
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-      <link type="text/css" rel="stylesheet" href="style.css">
-
-      <!-- Apexcharts js -->
-      <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-      
-      <link rel="shortcut icon" href="//abs.twimg.com/favicons/twitter.2.ico">
-			<script>
-        function fetchRandomTweets() {
-          const maxRepetitions = Math.floor(Math.random() * 10) + 1; // Avoid fetching zero
-          showMessage(maxRepetitions);
-          for(var i = 0; i < maxRepetitions; ++i) {
-            const tweetId = Math.floor(Math.random() * ${NUMBER_OF_TWEETS})
-            fetch("/tweets/" + tweetId + "/fetched", {cache: 'no-cache'})
-          }
-          // await sleep(10000); // Show for 10s and then auto-dismiss
-          // dismissMessage();
-        }
-
-
-        function scrollAndHighlightEntry(number) {
-          // Get the table element
-          var table = document.getElementById("allTweetsTable");
-          
-          // Get all the rows in the table
-          var rows = table.getElementsByTagName("tr");
-          
-          // Loop through the rows to find the matching entry
-          for (var i = 0; i < rows.length; i++) {
-            var row = rows[i];
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Twitter Sentiment Analysis - Big Data</title>
+            <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css"> -->
             
-            // Get the value in the first column of the current row
-            var firstColumnValue = parseInt(row.cells[0].textContent);
+            <!-- Bootstrap and custom styles -->
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+            <link type="text/css" rel="stylesheet" href="style.css">
+
+            <!-- Apexcharts js -->
+            <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
             
-            // Check if the value matches the input number
-            if (firstColumnValue === number) {
-              // Scroll to the matching row
-              row.scrollIntoView({ behavior: "smooth", block: "center" });
+            <link rel="shortcut icon" href="//abs.twimg.com/favicons/twitter.2.ico">
+            <script>
+                function fetchRandomTweets() {
+                    const maxRepetitions = Math.floor(Math.random() * 10) + 1; // Avoid fetching zero
+                    showMessage(maxRepetitions);
+                    for(let i = 0; i < maxRepetitions; i++) {
+                        const tweetId = Math.floor(Math.random() * ${options.numberOfTweets})
+                        fetch("/tweets/" + tweetId + "/fetched", {cache: 'no-cache'})
+                    }
+                }
+
+
+                function scrollAndHighlightEntry(number) {
+                    // Get the table element
+                    const table = document.getElementById("allTweetsTable");
+                    
+                    // Get all the rows in the table
+                    const rows = table.getElementsByTagName("tr");
+                    
+                    // Loop through the rows to find the matching entry
+                    for (var i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        
+                        // Get the value in the first column of the current row
+                        const firstColumnValue = parseInt(row.cells[0].textContent);
+                        
+                        // Check if the value matches the input number
+                        if (firstColumnValue === number) {
+                            // Scroll to the matching row
+                            row.scrollIntoView({ behavior: "smooth", block: "center" });
+                            
+                            // Add a highlight class to the row
+                            row.classList.add("highlight");
+                            
+                            // Remove the highlight class after 3 seconds
+                            setTimeout(function() {
+                                row.classList.remove("highlight");
+                            }, 3000);
+                            
+                            // Exit the loop since the matching entry is found
+                            break;
+                        }
+                    }
+                }
               
-              // Add a highlight class to the row
-              row.classList.add("highlight");
-              
-              // Remove the highlight class after 3 seconds
-              setTimeout(function() {
-                row.classList.remove("highlight");
-              }, 3000);
-              
-              // Exit the loop since the matching entry is found
-              break;
-            }
-          }
-        }
-        
-        // Generate one click for a certain tweet
-        function generateClick(tweetId) {
-          fetch("/tweets/" + tweetId + "/clicked", {cache: 'no-cache'});
-        }
-			</script>
-		</head>
-		<body>
-      <div class="app-bar">
-        <i class="bi bi-twitter"></i>
-        <h1 class="heading">Sentiment Analyzer</h1>
-        <a class="btn btn-primary" onclick="fetchRandomTweets()" role="button"><i class="bi bi-dice-5"></i> Generate tweet views!</a>
-      </div>
+                // Generate one click for a certain tweet
+                function generateClick(tweetId) {
+                    fetch("/tweets/" + tweetId + "/clicked", {cache: 'no-cache'});
+                }
+            </script>
+        </head>
+        <body>
+            <div class="app-bar">
+                <i class="bi bi-twitter"></i>
+                <h1 class="heading">Sentiment Analyzer</h1>
+                <a class="btn btn-primary" onclick="fetchRandomTweets()" role="button"><i class="bi bi-dice-5"></i> Generate tweet views!</a>
+            </div>
     
-      <div class="container-fluid">
-          <div class="app-content">
+            <div class="container-fluid">
+                <div class="app-content">
+                    ${loadingHTML}
+                    <div id="contentRow" class="row">
+                      ${html}
+                    </div>
 
-            ${loadingHTML}
-            <div id="contentRow" class="row">
-              ${html}
+                    <div class="row">
+                        <div class='col-lg-6 col-md-12'>
+                            <div class='content-container'>
+                                <h2>Page Information</h2>
+                                <div class='page-info-wrapper'>
+
+                                    <div class="page-info-container">
+                                        <i class="bi bi-hdd-rack-fill"></i>
+                                        <div class="page-info-content">
+                                            <p>Server</p>
+                                            <p>${os.hostname()}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="page-info-container">
+                                        <i class="bi bi-calendar-date"></i>
+                                        <div class="page-info-content">
+                                            <p>Generation date</p>
+                                            <p>${getCurrentDateTime()}</p>
+                                        </div>
+                                    </div>
+                                
+                                    <div class="page-info-container">
+                                        <i class="bi bi-memory"></i>
+                                        <div class="page-info-content">
+                                            <p>Memcached Servers (${memcachedServers.length})</p>
+                                            <p>${memcachedServers.join(" and  ")}</p>
+                                        </div>
+                                    </div>
+                                
+                                    <div class="page-info-container">
+                                        <i class="bi bi-menu-button-wide-fill"></i>
+                                        <div class="page-info-content">
+                                            <p>Result from cache</p>
+                                            <p>${cachedResult}</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class='col-lg-6 col-md-12 events-container-wrapper'>
+                            <div class='content-container events-container'>
+                                <h2>System Events</h2>
+                                <div id="eventChart"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
 
-            <div class="row">
-              <div class='col-lg-6 col-md-12'>
-                <div class='content-container'>
-                  <h2>Page Information</h2>
-                  <div class='page-info-wrapper'>
+            <!-- Bundle for bootstrap -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+            <script>
+                // Setting the height of the all tweets table container using the row.
+                document.getElementById("contentRow").style.height = document.getElementById("topTweets").offsetHeight + "px";
+                
+                let messagePopup = document.getElementById("messagePopup");
+                let timer;
+                function showMessage(maxRepetitions) {
+                    document.getElementById("out").innerHTML = "Fetching <b>" + maxRepetitions + "</b> random tweets!";
+                    messagePopup.style.display = "flex";
+                    messagePopup.style.opacity = 1;
+                    clearTimeout(timer);
+                    timer = setTimeout(dismissMessage, 10000);
+                }
 
-                    <div class="page-info-container">
-                      <i class="bi bi-hdd-rack-fill"></i>
-                      <div class="page-info-content">
-                        <p>Server</p>
-                        <p>${os.hostname()}</p>
-                      </div>
-                    </div>
+                const hidePopup = () => messagePopup.style.display = "none";
 
-                    <div class="page-info-container">
-                      <i class="bi bi-calendar-date"></i>
-                      <div class="page-info-content">
-                        <p>Generation date</p>
-                        <p>${getCurrentDateTime()}</p>
-                      </div>
-                    </div>
-                    
-                    <div class="page-info-container">
-                      <i class="bi bi-memory"></i>
-                      <div class="page-info-content">
-                        <p>Memcached Servers (${memcachedServers.length})</p>
-                        <p>${memcachedServers.join(" and  ")}</p>
-                      </div>
-                    </div>
-                    
-                    <div class="page-info-container">
-                      <i class="bi bi-menu-button-wide-fill"></i>
-                      <div class="page-info-content">
-                        <p>Result from cache</p>
-                        <p>${cachedResult}</p>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
-              <div class='col-lg-6 col-md-12 events-container-wrapper'>
-                <div class='content-container events-container'>
-                  <h2>System Events</h2>
-                  <div id="eventChart"></div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-      </div>
-
-      <!-- Bundle for bootstrap -->
-      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-      <script>
-        // Setting the heigth of the all tweets table contianer using the row.
-        document.getElementById("contentRow").style.height = document.getElementById("topTweets").offsetHeight + "px";
-        
-        let messagePopup = document.getElementById("messagePopup");
-        let timer;
-        function showMessage(maxRepetitions) {
-          document.getElementById("out").innerHTML = "Fetching <b>" + maxRepetitions + "</b> random tweets!";
-          messagePopup.style.display = "flex";
-          messagePopup.style.opacity = 1;
-          clearTimeout(timer);
-          timer = setTimeout(dismissMessage, 10000);
-        }
-
-        let hidePopup = () => messagePopup.style.display = "none";
-
-        function dismissMessage() {
-          messagePopup.style.opacity = 0;
-          setTimeout(hidePopup, 300);
-        }
+                function dismissMessage() {
+                    messagePopup.style.opacity = 0;
+                    setTimeout(hidePopup, 300);
+                }
 
 
-        // Define chart options for events chart
-        var eventChartOptions = {
-          chart: {
-            type: 'bar',
-          },
-          series: [{
-            name: 'View count origin',
-            data: [${eventsList && eventsList.length ? eventsList.map((e: any[]) => e[1]).join(",") : ""}]
-          }],
-          xaxis: {
-            categories: [${
-                eventsList && eventsList.length ? eventsList.map((e: string[]) => '"' + e[0] + '"').join(",") : ""
-            }],
-          },
-          yaxis: {
-            labels: {
-              formatter: function (value) {
-                return Number(value).toLocaleString();
-              }
-            }
-          },
-          plotOptions: {
-            bar: {
-              borderRadius: 3,
-              dataLabels: {
-                position: 'center',
-              },
-              colors: {
-                backgroundBarColors: 'rgb(29, 155, 240)',
-                backgroundBarOpacity: 0,
-                barBorderWidth: 0,
-              },
-            }
-          },
-          options: {
-            responsie: true,
-          }
-        };
+                // Define chart options for events chart
+                const eventChartOptions = {
+                    chart: {
+                        type: 'bar',
+                    },
+                    series: [{
+                        name: 'View count origin',
+                        data: [${
+                            eventsList && eventsList.length ? eventsList.map((evt: EventTuple) => evt[1]).join(",") : ""
+                        }]
+                    }],
+                    xaxis: {
+                        categories: [${
+                            eventsList && eventsList.length
+                                ? eventsList.map((evt: EventTuple) => '"' + evt[0] + '"').join(",")
+                                : ""
+                        }],
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: function (value) {
+                                return Number(value).toLocaleString();
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 3,
+                            dataLabels: {
+                                position: 'center',
+                            },
+                            colors: {
+                                backgroundBarColors: 'rgb(29, 155, 240)',
+                                backgroundBarOpacity: 0,
+                                barBorderWidth: 0,
+                            },
+                        }
+                    },
+                    options: {
+                        responsie: true,
+                    }
+                };
 
-        // Create the chart
-        var eventChart = new ApexCharts(document.querySelector("#eventChart"), eventChartOptions);
-        eventChart.render();
-      </script>
-		</body>
-	</html>
+                // Create the chart
+                const eventChart = new ApexCharts(document.querySelector("#eventChart"), eventChartOptions);
+                eventChart.render();
+            </script>
+		    </body>
+	      </html>
 	`);
 }
 
-// Return HTML for start page
+interface Tweet {
+    tweetId: number;
+    username: string;
+    tweetContent: string;
+}
+
+interface PopularTweet extends Tweet {
+    profilePictureUrl: string;
+    sentiment: number;
+    tweetViews: number;
+}
+
+type Event = { eventType: string; count: number };
+
+type EventTuple = [string, number];
+type EventsList = EventTuple[];
+
+/** Returns the web page. */
 app.get("/", (_req: Request, res: Response) => {
-    const topX = 10;
-    Promise.all([getTweets(), getPopular(topX), getEvents()]).then(values => {
-        const tweets = values[0];
-        const popular = values[1];
-        const events = values[2];
+    Promise.all([getTweets(), getPopular(parseInt(options.topXTweets)), getEvents()]).then(values => {
+        const [tweets, popularTweets, events] = values;
 
-        let tweetsHtml = tweets.result
+        // Creates a list of tweets
+        const tweetsHtml = tweets.result
             .map(
-                (pop: { tweetId: any; userName: any; tweetContent: any }) =>
-                    `<tr onclick="generateClick(${pop.tweetId})">
-                        <td>${pop.tweetId}</td>
-                        <td>${pop.userName}</td>
-                        <td>${pop.tweetContent}</td>
-                    </tr>`,
+                (tweet: Tweet) => `
+                    <tr onclick="generateClick(${tweet.tweetId})">
+                        <td>${tweet.tweetId}</td>
+                        <td>${tweet.username}</td>
+                        <td>${tweet.tweetContent}</td>
+                    </tr>
+                `,
             )
             .join("\n");
 
-        let popularHtml = popular
+        // Creates a list of top 10 tweets
+        let popularHtml = popularTweets
             .map(
-                (pop: { tweetId: any; sentiment: number; profile_picture_url: any; author: any; count: any }) =>
-                    `<a href='javascript:scrollAndHighlightEntry(${pop.tweetId});'>
-                      <li>
-                        <div class="sentiment-container ${
-                            pop.sentiment == 1 ? "positive" : "negative"
-                        }-sentiment"></div>
-                        <div class="sentiment-shade"></div>
-                        <div class="profile-image">
-                          <img src="${pop.profile_picture_url}" alt="User profile picture">
-                        </div>
-                        <div class="user-info">
-                          <p class="user-name">${pop.author}</p>
-                          <p class="sentiment-indicator">Sentiment: ${pop.sentiment == 1 ? "positive" : "negative"}</p>
-                        </div>
-                        <div class="view-count">
-                          ${pop.count}
-                        </div>
-                    </li>
-                  </a>`,
+                (popularTweet: PopularTweet) => `
+                    <a href='javascript:scrollAndHighlightEntry(${popularTweet.tweetId});'>
+                        <li>
+                            <div class="sentiment-container ${
+                                popularTweet.sentiment === 1 ? "positive" : "negative"
+                            }-sentiment"></div>
+                            <div class="sentiment-shade"></div>
+                            <div class="profile-image">
+                                <img src="${popularTweet.profilePictureUrl}" alt="User profile picture">
+                            </div>
+                            <div class="user-info">
+                                <p class="user-name">${popularTweet.username}</p>
+                                <p class="sentiment-indicator">Sentiment: ${
+                                    popularTweet.sentiment === 1 ? "positive" : "negative"
+                                }</p>
+                            </div>
+                            <div class="view-count">
+                                ${popularTweet.tweetViews}
+                            </div>
+                        </li>
+                    </a>
+                `,
             )
             .join("\n");
 
+        // At launch, a loading container is created for the popular tweets
         let showLoadingMessage = false;
         if (!popularHtml) {
             showLoadingMessage = true;
-
             popularHtml = `
                 <a href=''>
-                  <li>
-                    <div aria-hidden="true" class="placeholder-wave w-75"><span class="placeholder w-100"></span</div>
-                  </li>
+                    <li>
+                        <div aria-hidden="true" class="placeholder-wave w-75"><span class="placeholder w-100"></span</div>
+                    </li>
                 </a>
             `.repeat(10);
         }
 
-        function capitalizeFirstLetter(str: string) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
+        const capitalizeFirstLetter = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-        const eventsList = events.map((e: { eventType: string; count: number }) => [
-            capitalizeFirstLetter(e.eventType),
-            e.count,
-        ]);
+        const eventsList = events.map((evt: Event) => [capitalizeFirstLetter(evt.eventType), evt.count]);
 
+        // Upon launch, a notification will appear indicating the approximate wait time until the popular Tweets container is first seen
         let loadingHTML = "";
         if (showLoadingMessage) {
             loadingHTML = `
@@ -317,56 +335,53 @@ app.get("/", (_req: Request, res: Response) => {
                         Waiting for the database to come up and be filled with data...<br>
                         This takes about <b>three minutes</b>. Please <b>refresh</b> in a few seconds!
                     </div>
-                </div>`;
-        } else {
-            loadingHTML = "";
+                </div>
+            `;
         }
 
         const html = `
-    <!-- Top 10 tweets list -->
-    <div class="col-lg-5 col-md-12">
-        <div id="topTweets" class="top-tweets content-container">
-          <h2>Top ${topX} Tweets</h2>
-          <ol> ${popularHtml} </ol>
-        </div>
-    </div>
+            <!-- Top 10 tweets list -->
+            <div class="col-lg-5 col-md-12">
+                <div id="topTweets" class="top-tweets content-container">
+                    <h2>Top ${options.topXTweets} Tweets</h2>
+                    <ol> ${popularHtml} </ol>
+                </div>
+            </div>
 
-    <!-- All tweets list -->
-    <div class="col-lg-7 col-md-12 right-column">
-        <div class="all-tweets content-container">
-          <h2>All Tweets</h2>
-          <div class="table-wrapper">
-            <table id="allTweetsTable">
-                <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Content</th>
-                </tr>
-                ${tweetsHtml}
-            </table>
-          </div>
-        </div>
-    </div>
+            <!-- All tweets list -->
+            <div class="col-lg-7 col-md-12 right-column">
+                <div class="all-tweets content-container">
+                    <h2>All Tweets</h2>
+                    <div class="table-wrapper">
+                        <table id="allTweetsTable">
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Content</th>
+                            </tr>
+                            ${tweetsHtml}
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-    <div id="messagePopup" class="fetch-confirmation alert alert-dismissable fade show" role="alert">
-      <i class="bi bi-check-circle-fill"></i>
-      <span id="out"></span>
-      <button type="button" class="btn-close" onclick="dismissMessage()" aria-label="Close"></button>
-    </div>
-    `;
+            <div id="messagePopup" class="fetch-confirmation alert alert-dismissable fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <span id="out"></span>
+                <button type="button" class="btn-close" onclick="dismissMessage()" aria-label="Close"></button>
+            </div>
+        `;
+
         sendResponse(res, html, tweets.cached, loadingHTML, eventsList);
     });
 });
 
+/** Publishes the Kafka topics. */
 app.get("/tweets/:id/:event", async (req: Request, _res: Response) => {
-    let event = req.params["event"];
-    let tweetId = req.params["id"];
+    const event = req.params["event"];
+    const tweetId = req.params["id"];
     const tweet = await getTweet(tweetId);
     const timestamp = Math.floor((new Date() as any) / 1000);
-
-    console.log("here", event);
-
-    // Send the tracking message to Kafka
     sendBatchMessage(
         {
             tweet_id: tweet.tweetId,
@@ -377,10 +392,4 @@ app.get("/tweets/:id/:event", async (req: Request, _res: Response) => {
     );
 });
 
-// -------------------------------------------------------
-// Main method
-// -------------------------------------------------------
-
-app.listen(options.port, function () {
-    logging("Node app is running at http://localhost:" + options.port);
-});
+app.listen(options.port, () => logging("Node app is running at http://localhost:" + options.port));

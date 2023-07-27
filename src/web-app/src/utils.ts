@@ -1,8 +1,7 @@
 import moment from "moment";
 
+/** Logs messages in PySpark format. */
 export function logging(message: string) {
-  const dateTime = new Date();
-  console.log(
-    moment(dateTime).format("YY/MM/DD HH:MM:SS") + " INFO " + message
-  );
+    const date = new Date();
+    console.log(moment(date).format("YY/MM/DD HH:MM:SS") + " INFO " + message);
 }

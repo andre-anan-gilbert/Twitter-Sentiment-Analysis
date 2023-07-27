@@ -1,5 +1,6 @@
-import { Kafka } from "kafkajs";
-import { NUMBER_OF_TWEETS, options } from "./config";
+/** Kafka producer. */
+import { Kafka, TopicMessages } from "kafkajs";
+import { options } from "./config";
 import { getTweet } from "./database";
 import { logging } from "./utils";
 
@@ -13,14 +14,18 @@ const kafka = new Kafka({
 
 const producer = kafka.producer();
 
-// Send tracking message to Kafka
-export async function sendBatchMessage(
-    tweetMessage: { tweet_id: any; tweet: string; timestamp: number },
-    eventMessage: { event_type: string; timestamp: number },
-) {
+type TweetMessage = { tweet_id: number; tweet: string; timestamp: number };
+type EventMessage = { event_type: string; timestamp: number };
+
+/**
+ * Sends messages to Kafka as batch.
+ * @param tweetMessage The tweet message published as tracking-tweets.
+ * @param eventMessage The event message published as tracking-events.
+ */
+export async function sendBatchMessage(tweetMessage: TweetMessage, eventMessage: EventMessage) {
     await producer.connect();
 
-    const topicMessages = [
+    const topicMessages: TopicMessages[] = [
         {
             topic: options.kafkaTopicTweets,
             messages: [{ value: JSON.stringify(tweetMessage) }],
@@ -37,13 +42,11 @@ export async function sendBatchMessage(
         .catch(err => logging(`Error sending to kafka ${err}`));
 }
 
-// Simulate data streaming
+/** Publishes a tweet to Kafka every 10s. */
 async function streamTweets() {
-    const tweetId = Math.floor(Math.random() * NUMBER_OF_TWEETS);
+    const tweetId = Math.floor(Math.random() * options.numberOfTweets);
     const tweet = await getTweet(tweetId.toString());
     const timestamp = Math.floor((new Date() as any) / 1000);
-
-    // Send the tracking message to Kafka
     sendBatchMessage(
         {
             tweet_id: tweet.tweetId,
@@ -54,9 +57,6 @@ async function streamTweets() {
     );
 }
 
-function initialStreamOfTweets() {
-    for (let i = 0; i < 5; i++) streamTweets();
-}
-
-initialStreamOfTweets();
-setInterval(streamTweets, 30000);
+// Initially stream 1 tweet, then stream 1 tweet every 10s
+streamTweets();
+setInterval(streamTweets, 10000);

@@ -14,7 +14,12 @@ _DB_OPTIONS = {
 
 
 def save_tweets_to_db(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
-    """Saves a batch to MariaDB."""
+    """Saves a batch to MariaDB.
+    
+    Args:
+        batch_df: The data frame of the tweets batch.
+        batch_id: The id of the batch to be saved.
+    """
 
     def save_partition_to_db(iterator: Iterator) -> None:
         db_connection = mysql.connector.connect(**_DB_OPTIONS)
@@ -38,7 +43,12 @@ def save_tweets_to_db(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
 
 
 def save_events_to_db(batch_df: pyspark.sql.DataFrame, batch_id: int) -> None:
-    """Saves a batch to MariaDB."""
+    """Saves a batch to MariaDB.
+    
+    Args:
+        batch_df: The data frame of the events batch.
+        batch_id: The id of the batch to be saved.
+    """
 
     def save_partition_to_db(iterator: Iterator) -> None:
         db_connection = mysql.connector.connect(**_DB_OPTIONS)
