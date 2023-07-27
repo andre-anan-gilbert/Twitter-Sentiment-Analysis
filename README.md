@@ -3,7 +3,7 @@
 
 The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and PySpark to analyse the sentiment of tweets in real-time using machine learning. The Spark app uses a logistic regression model to predict the sentiment of tweets that are streamed via Kafka and the results of the Spark jobs can be viewed via the Express.js app. 
 
-<video src="docs/Screencast.mp4" controls title="Demo"></video>
+https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/assets/59315862/215677f9-bc7f-4fed-9d86-e708e8bb781f
 
 ## Contributors
 - André Anan Gilbert (3465546)
