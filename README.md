@@ -4,6 +4,7 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 
 [Screencast can be viewed on GitHub or here: /docs/Screencast.mp4]: <>
 https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/assets/59315862/215677f9-bc7f-4fed-9d86-e708e8bb781f
+<video src="docs/Screencast.mp4" controls title="Title"></video>
 
 ## Contributors
 
