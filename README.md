@@ -7,6 +7,8 @@ The goal of this project is to showcase how to use Kubernetes, Docker, Kafka and
 [This renders the screencast on GitHub]: <>
 https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/assets/59315862/215677f9-bc7f-4fed-9d86-e708e8bb781f
 
+The final Project presentation can be found [here](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/Presentation.pdf).
+
 ## Contributors
 
 - André Anan Gilbert (3465546)
