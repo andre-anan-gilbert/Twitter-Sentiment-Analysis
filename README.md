@@ -9,7 +9,7 @@ https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/assets/59315862/2156
 
 
 <br>
-The final Project presentation can be found [here](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/Presentation.pdf).
+The final Project presentation can be found [here]("https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/Presentation.pdf").
 
 ## Contributors
 
