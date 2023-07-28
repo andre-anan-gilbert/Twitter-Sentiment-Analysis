@@ -204,6 +204,13 @@ function sendResponse(res: Response, html: string, cachedResult: boolean, loadin
                             eventsList && eventsList.length ? eventsList.map((evt: EventTuple) => evt[1]).join(",") : ""
                         }]
                     }],
+                    dataLabels: {
+                        enabled: true,
+                        style: {
+                          colors: ['rgba(0, 0, 0, 0.8)'], // Bar amount text color
+                          fontSize: '14px' // Bar amount font size
+                        }
+                    },
                     xaxis: {
                         categories: [${
                             eventsList && eventsList.length
