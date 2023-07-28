@@ -12,6 +12,7 @@ https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/assets/59315862/2156
 Resources:
 - The final project presentation can be found [here](https://github.com/Andre-Gilbert/Twitter-Sentiment-Analysis/blob/main/docs/Presentation.pdf).
 - The screen cast is available in 4K on [youtube](https://youtu.be/aHeO7L6s5TM).
+- The local screen cast is can be found [here](/docs/Screencast.mp4).
 
 ## Contributors
 
